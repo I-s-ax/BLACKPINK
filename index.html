@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>BLACKPINK</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at 15% 15%, #fff5f8 0, transparent 35%),
+        linear-gradient(135deg, #fff5f8, #f7dbe5);
+      color: #111;
+    }
+
+    /* ================= HEADER ================= */
+
+    header {
+      height: 88px;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0,0,0,.18);
+    }
+
+    .logo {
+      color: #f28ab2;
+      border: 3px solid #f28ab2;
+      padding: 8px 16px;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 3px;
+    }
+
+    /* ================= HAMBURGER ================= */
+
+    .hamburger {
+      position: absolute;
+      right: 35px;
+      width: 42px;
+      height: 35px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .hamburger span {
+      width: 100%;
+      height: 4px;
+      border-radius: 10px;
+      background: #f28ab2;
+      transition: .3s;
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: translateY(15px) rotate(45deg);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: translateY(-15px) rotate(-45deg);
+    }
+
+    /* ================= MENU ================= */
+
+    nav {
+      position: fixed;
+      top: 88px;
+      right: -100%;
+      width: 300px;
+      height: calc(100vh - 88px);
+      background: rgba(17,17,17,.98);
+      padding: 60px 35px;
+      transition: right .35s ease;
+      z-index: 999;
+    }
+
+    nav.active {
+      right: 0;
+    }
+
+    nav a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      font-size: 24px;
+      margin-bottom: 30px;
+      transition: .2s;
+    }
+
+    nav a:hover {
+      color: #f28ab2;
+      transform: translateX(8px);
+    }
+
+    /* ================= CONTENIDO ================= */
+
+    main {
+      width: min(1150px, 92%);
+      margin: auto;
+      padding: 45px 0 70px;
+    }
+
+    .member {
+      min-height: 430px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 60px;
+      margin-bottom: 35px;
+    }
+
+    .member:nth-child(even) .photo {
+      order: 2;
+    }
+
+    .member:nth-child(even) .info {
+      order: 1;
+    }
+
+    /* ================= IMAGEN ================= */
+
+    .photo {
+      position: relative;
+    }
+
+    .photo::before {
+      content: "";
+      position: absolute;
+      inset: 15px -15px -15px 15px;
+      background: #ef8fb2;
+      border-radius: 22px;
+      opacity: .25;
+    }
+
+    .photo img {
+      width: 100%;
+      height: 390px;
+      display: block;
+      object-fit: cover;
+      object-position: center;
+      border-radius: 22px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 15px 35px rgba(0,0,0,.12);
+    }
+
+    /* ================= TEXTO ================= */
+
+    .info h2 {
+      font-size: clamp(38px, 5vw, 58px);
+      font-weight: 900;
+      letter-spacing: -2px;
+      margin-bottom: 12px;
+    }
+
+    .line {
+      width: 75px;
+      height: 5px;
+      background: #e980a8;
+      margin-bottom: 20px;
+      border-radius: 20px;
+    }
+
+    .info p {
+      font-size: 20px;
+      line-height: 1.55;
+      max-width: 520px;
+    }
+
+    /* ================= FOOTER ================= */
+
+    footer {
+      min-height: 160px;
+      background: #111;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    footer h3 {
+      color: #f28ab2;
+      letter-spacing: 12px;
+      margin-bottom: 14px;
+    }
+
+    footer p {
+      font-size: 12px;
+      letter-spacing: 6px;
+      opacity: .8;
+    }
+
+    .heart {
+      margin-top: 15px;
+      color: #f28ab2;
+      font-size: 22px;
+    }
+
+    /* ================= CELULAR ================= */
+
+    @media (max-width: 750px) {
+
+      header {
+        height: 75px;
+      }
+
+      .logo {
+        font-size: 20px;
+      }
+
+      .hamburger {
+        right: 22px;
+        width: 32px;
+        height: 27px;
+      }
+
+      .hamburger.active span:nth-child(1) {
+        transform: translateY(11px) rotate(45deg);
+      }
+
+      .hamburger.active span:nth-child(3) {
+        transform: translateY(-11px) rotate(-45deg);
+      }
+
+      nav {
+        top: 75px;
+        height: calc(100vh - 75px);
+        width: 100%;
+        text-align: center;
+      }
+
+      main {
+        padding-top: 25px;
+      }
+
+      .member {
+        grid-template-columns: 1fr;
+        gap: 25px;
+        margin-bottom: 65px;
+      }
+
+      .member:nth-child(even) .photo,
+      .member:nth-child(even) .info {
+        order: initial;
+      }
+
+      .photo img {
+        height: 440px;
+      }
+
+      .info h2 {
+        font-size: 40px;
+      }
+
+      .info p {
+        font-size: 17px;
+      }
+    }
+
+    @media (max-width: 450px) {
+
+      .photo img {
+        height: 360px;
+      }
+
+      .logo {
+        font-size: 17px;
+        letter-spacing: 2px;
+      }
+
+      footer h3 {
+        letter-spacing: 7px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+
+  <div class="logo">
+    BLACKPINK
+  </div>
+
+  <button class="hamburger" id="hamburger" aria-label="Abrir menú">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+</header>
+
+
+<nav id="menu">
+
+  <a href="#jisoo">Jisoo</a>
+  <a href="#jennie">Jennie</a>
+  <a href="#rose">Rosé</a>
+  <a href="#lisa">Lisa</a>
+
+</nav>
+
+
+<main>
+
+  <!-- JISOO -->
+
+  <section class="member" id="jisoo">
+
+    <div class="photo">
+      <img src="images/jisoo.jpg" alt="Jisoo">
+    </div>
+
+    <div class="info">
+
+      <h2>JISOO</h2>
+
+      <div class="line"></div>
+
+      <p>
+        Jisoo es integrante de BLACKPINK. Es cantante y actriz,
+        reconocida por su voz, presencia escénica y participación
+        en diferentes proyectos dentro de la industria del
+        entretenimiento.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- JENNIE -->
+
+  <section class="member" id="jennie">
+
+    <div class="photo">
+      <img src="images/jennie.jpg" alt="Jennie">
+    </div>
+
+    <div class="info">
+
+      <h2>JENNIE</h2>
+
+      <div class="line"></div>
+
+      <p>
+        Jennie es cantante y rapera de BLACKPINK. Destaca por
+        su estilo, presencia escénica y participación tanto
+        dentro del grupo como en proyectos musicales en solitario.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ROSÉ -->
+
+  <section class="member" id="rose">
+
+    <div class="photo">
+      <img src="images/rose.jpg" alt="Rosé">
+    </div>
+
+    <div class="info">
+
+      <h2>ROSÉ</h2>
+
+      <div class="line"></div>
+
+      <p>
+        Rosé es cantante de BLACKPINK y también ha desarrollado
+        una carrera como solista. Es reconocida por su particular
+        estilo vocal y su participación musical dentro del grupo.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- LISA -->
+
+  <section class="member" id="lisa">
+
+    <div class="photo">
+      <img src="images/lisa.jpg" alt="Lisa">
+    </div>
+
+    <div class="info">
+
+      <h2>LISA</h2>
+
+      <div class="line"></div>
+
+      <p>
+        Lisa es rapera, cantante y bailarina de BLACKPINK.
+        Es conocida especialmente por sus habilidades de baile,
+        presencia escénica y proyectos desarrollados como solista.
+      </p>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<footer>
+
+  <h3>BLACKPINK</h3>
+
+  <p>MUSIC BRINGS US TOGETHER</p>
+
+  <div class="heart">♥</div>
+
+</footer>
+
+
+<script>
+
+  const hamburger = document.getElementById("hamburger");
+  const menu = document.getElementById("menu");
+  const links = menu.querySelectorAll("a");
+
+  hamburger.addEventListener("click", () => {
+
+    hamburger.classList.toggle("active");
+    menu.classList.toggle("active");
+
+  });
+
+
+  links.forEach(link => {
+
+    link.addEventListener("click", () => {
+
+      hamburger.classList.remove("active");
+      menu.classList.remove("active");
+
+    });
+
+  });
+
+</script>
+
+</body>
+</html>
