@@ -297,9 +297,6 @@
         letter-spacing: 7px;
       }
     }
-    .private-access {
-    display: none !important;
-}
   </style>
 </head>
 
