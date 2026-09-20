@@ -385,39 +385,23 @@ footer {
 
   <div class="categories" id="categories">
 
-    <button class="category active" data-category="Todas">
-      Todas
-    </button>
+  <button
+    class="category active"
+    data-category="Todas"
+    type="button"
+  >
+    Todas
+  </button>
 
-    <button class="category" data-category="Conciertos">
-      Conciertos
-    </button>
+  <button
+    class="category new-category"
+    id="newCategoryButton"
+    type="button"
+  >
+    + Nueva categoría
+  </button>
 
-    <button class="category" data-category="Vacaciones">
-      Vacaciones
-    </button>
-
-    <button class="category" data-category="Detrás de Cámaras">
-      Detrás de Cámaras
-    </button>
-
-    <button class="category" data-category="Sesiones de Fotos">
-      Sesiones de Fotos
-    </button>
-
-    <button class="category" data-category="Dramas">
-      Dramas
-    </button>
-
-    <button class="category" data-category="Eventos">
-      Eventos
-    </button>
-
-    <button class="category" data-category="Otros">
-      Otros
-    </button>
-
-  </div>
+</div>
 
   <div id="message" class="message"></div>
 
@@ -463,17 +447,11 @@ footer {
           Categoría
         </label>
 
-        <select id="albumCategory">
-
-          <option>Conciertos</option>
-          <option>Vacaciones</option>
-          <option>Detrás de Cámaras</option>
-          <option>Sesiones de Fotos</option>
-          <option>Dramas</option>
-          <option>Eventos</option>
-          <option>Otros</option>
-
-        </select>
+        <select id="albumCategory" required>
+  <option value="">
+    Selecciona una categoría
+  </option>
+</select>
 
       </div>
 
@@ -516,6 +494,57 @@ footer {
 
 </div>
 
+<!-- CREAR CATEGORÍA -->
+
+<div class="modal" id="categoryModal">
+
+  <div class="modal-box">
+
+    <h2>Nueva categoría</h2>
+
+    <form id="categoryForm">
+
+      <div class="field">
+
+        <label for="categoryName">
+          Nombre
+        </label>
+
+        <input
+          id="categoryName"
+          maxlength="50"
+          required
+          autocomplete="off"
+          placeholder="Ej. Conciertos"
+        >
+
+      </div>
+
+      <div class="modal-actions">
+
+        <button
+          class="btn cancel"
+          id="cancelCategory"
+          type="button"
+        >
+          Cancelar
+        </button>
+
+        <button
+          class="btn save"
+          id="saveCategory"
+          type="submit"
+        >
+          Crear
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
 
 <script>
 
@@ -538,6 +567,7 @@ const message =
 
 let currentCategory = "Todas";
 let favoritesOnly = false;
+let categoryList = [];
 
 
 /* API */
@@ -822,34 +852,283 @@ createForm.addEventListener(
   }
 );
 
+/* =========================================
+   CATEGORÍAS DINÁMICAS
+========================================= */
 
-/* CATEGORÍAS */
+async function loadCategories() {
 
-document
-  .querySelectorAll(".category")
-  .forEach(button => {
+  try {
+
+    const data =
+      await api("/categories");
+
+    categoryList =
+      data.categories || [];
+
+    renderCategories();
+    renderCategorySelect();
+
+  } catch (error) {
+
+    console.error(
+      "Error cargando categorías:",
+      error
+    );
+
+  }
+}
+
+
+function renderCategories() {
+
+  const container =
+    document.getElementById("categories");
+
+  container.innerHTML = "";
+
+
+  // TODAS
+
+  const allButton =
+    document.createElement("button");
+
+  allButton.type = "button";
+  allButton.className =
+    "category" +
+    (
+      currentCategory === "Todas"
+        ? " active"
+        : ""
+    );
+
+  allButton.textContent = "Todas";
+
+  allButton.addEventListener(
+    "click",
+    () => {
+
+      currentCategory = "Todas";
+
+      renderCategories();
+      loadAlbums();
+
+    }
+  );
+
+  container.appendChild(allButton);
+
+
+  // CATEGORÍAS DEL USUARIO
+
+  for (const category of categoryList) {
+
+    const button =
+      document.createElement("button");
+
+    button.type = "button";
+
+    button.className =
+      "category" +
+      (
+        currentCategory === category.name
+          ? " active"
+          : ""
+      );
+
+    button.textContent =
+      category.name;
 
     button.addEventListener(
       "click",
       () => {
 
-        document
-          .querySelectorAll(".category")
-          .forEach(item =>
-            item.classList.remove("active")
-          );
-
-        button.classList.add("active");
-
         currentCategory =
-          button.dataset.category;
+          category.name;
 
+        renderCategories();
         loadAlbums();
+
       }
     );
 
-  });
+    container.appendChild(button);
+  }
 
+
+  // NUEVA CATEGORÍA
+
+  const newButton =
+    document.createElement("button");
+
+  newButton.type = "button";
+  newButton.className =
+    "category new-category";
+
+  newButton.textContent =
+    "+ Nueva categoría";
+
+  newButton.addEventListener(
+    "click",
+    openCategoryModal
+  );
+
+  container.appendChild(newButton);
+}
+
+
+function renderCategorySelect() {
+
+  const select =
+    document.getElementById(
+      "albumCategory"
+    );
+
+  select.innerHTML = `
+    <option value="">
+      Selecciona una categoría
+    </option>
+  `;
+
+  for (const category of categoryList) {
+
+    const option =
+      document.createElement("option");
+
+    option.value =
+      category.name;
+
+    option.textContent =
+      category.name;
+
+    select.appendChild(option);
+  }
+}
+
+
+/* MODAL */
+
+const categoryModal =
+  document.getElementById(
+    "categoryModal"
+  );
+
+const categoryForm =
+  document.getElementById(
+    "categoryForm"
+  );
+
+
+function openCategoryModal() {
+
+  categoryModal.classList.add(
+    "show"
+  );
+
+  setTimeout(() => {
+
+    document
+      .getElementById("categoryName")
+      .focus();
+
+  }, 100);
+}
+
+
+function closeCategoryModal() {
+
+  categoryModal.classList.remove(
+    "show"
+  );
+
+  categoryForm.reset();
+}
+
+
+document
+  .getElementById("cancelCategory")
+  .addEventListener(
+    "click",
+    closeCategoryModal
+  );
+
+
+categoryModal.addEventListener(
+  "click",
+  event => {
+
+    if (event.target === categoryModal) {
+      closeCategoryModal();
+    }
+
+  }
+);
+
+
+/* CREAR */
+
+categoryForm.addEventListener(
+  "submit",
+  async event => {
+
+    event.preventDefault();
+
+    const input =
+      document.getElementById(
+        "categoryName"
+      );
+
+    const button =
+      document.getElementById(
+        "saveCategory"
+      );
+
+    const name =
+      input.value.trim();
+
+    if (!name) {
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent =
+      "Creando...";
+
+    try {
+
+      await api(
+        "/categories",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            name
+          })
+        }
+      );
+
+      closeCategoryModal();
+
+      await loadCategories();
+
+    } catch (error) {
+
+      alert(error.message);
+
+    } finally {
+
+      button.disabled = false;
+      button.textContent = "Crear";
+
+    }
+
+  }
+);
 
 /* FAVORITOS */
 
@@ -915,7 +1194,12 @@ function openAlbum(id) {
 
 /* INICIAR */
 
-loadAlbums();
+async function init() {
+  await loadCategories();
+  await loadAlbums();
+}
+
+init();
 
 </script>
 
