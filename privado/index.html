@@ -415,6 +415,68 @@ footer {
 
 <footer>
   BLACKPINK PRIVATE GALLERY
+<!-- VISTA DEL ÁLBUM -->
+
+<div
+  id="albumView"
+  style="
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#fff;
+    z-index:999;
+    overflow:auto;
+  "
+>
+
+  <div style="padding:20px">
+
+    <button
+      id="backToAlbums"
+      class="action light"
+      type="button"
+    >
+      ← Volver
+    </button>
+
+    <h2 id="albumTitle">
+      Álbum
+    </h2>
+
+    <p id="albumInfo"></p>
+
+    <input
+      id="photoUploader"
+      type="file"
+      multiple
+      accept="image/*"
+      style="display:none"
+    >
+
+    <button
+      id="uploadPhotosButton"
+      class="action"
+      type="button"
+    >
+      + Subir fotos
+    </button>
+
+    <div
+      id="photoGrid"
+      style="
+        margin-top:20px;
+        display:grid;
+        gap:12px;
+        grid-template-columns:
+        repeat(auto-fill,minmax(140px,1fr));
+      "
+    ></div>
+
+  </div>
+
+</div>
+  
+  
 </footer>
 
 
@@ -1177,20 +1239,25 @@ searchInput.addEventListener(
 
 /* ABRIR ÁLBUM */
 
-function openAlbum(id) {
+let currentAlbumId = null;
 
-  /*
-    En el siguiente paso esta función
-    abrirá el álbum y permitirá subir
-    fotografías.
-  */
+async function openAlbum(id) {
 
-  console.log(
-    "Abrir álbum:",
-    id
-  );
+  currentAlbumId = id;
+
+  try {
+
+    const data =
+      await api(`/albums/${id}`);
+
+    renderAlbumView(data);
+
+  } catch (error) {
+
+    alert(error.message);
+
+  }
 }
-
 
 /* INICIAR */
 
@@ -1198,6 +1265,164 @@ async function init() {
   await loadCategories();
   await loadAlbums();
 }
+
+
+function renderAlbumView(data) {
+
+  const albumView =
+    document.getElementById(
+      "albumView"
+    );
+
+  document
+    .getElementById("albumTitle")
+    .textContent =
+      data.album.name;
+
+  document
+    .getElementById("albumInfo")
+    .textContent =
+      `${data.photos.length} foto(s)`;
+
+  const grid =
+    document.getElementById(
+      "photoGrid"
+    );
+
+  grid.innerHTML = "";
+
+  for (const photo of data.photos) {
+
+    const image =
+      document.createElement("img");
+
+    image.src =
+      `${API}/images/${
+        encodeURIComponent(
+          photo.r2_key
+        )
+      }`;
+
+    image.loading = "lazy";
+
+    image.style.width = "100%";
+    image.style.aspectRatio = "1";
+    image.style.objectFit = "cover";
+    image.style.borderRadius = "14px";
+
+    grid.appendChild(image);
+  }
+
+  albumView.style.display =
+    "block";
+}
+
+
+document
+  .getElementById(
+    "backToAlbums"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      document
+        .getElementById(
+          "albumView"
+        )
+        .style.display = "none";
+
+    }
+  );
+  
+  
+document
+  .getElementById(
+    "uploadPhotosButton"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      document
+        .getElementById(
+          "photoUploader"
+        )
+        .click();
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "photoUploader"
+  )
+  .addEventListener(
+    "change",
+    async event => {
+
+      const files =
+        [...event.target.files];
+
+      if (
+        !files.length ||
+        !currentAlbumId
+      ) {
+        return;
+      }
+
+      try {
+
+        for (const file of files) {
+
+          const form =
+            new FormData();
+
+          form.append(
+            "file",
+            file
+          );
+
+          const response =
+            await fetch(
+              `${API}/albums/${currentAlbumId}/photos`,
+              {
+                method: "POST",
+                body: form,
+                credentials:
+                  "same-origin"
+              }
+            );
+
+          const data =
+            await response.json();
+
+          if (
+            !response.ok ||
+            data.ok === false
+          ) {
+            throw new Error(
+              data.error ||
+              "Error subiendo imagen"
+            );
+          }
+        }
+
+        openAlbum(
+          currentAlbumId
+        );
+
+        loadAlbums();
+
+      } catch (error) {
+
+        alert(error.message);
+
+      }
+
+    }
+  );
 
 init();
 

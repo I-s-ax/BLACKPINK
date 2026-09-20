@@ -415,6 +415,68 @@ footer {
 
 <footer>
   BLACKPINK PRIVATE GALLERY
+<!-- VISTA DEL ÁLBUM -->
+
+<div
+  id="albumView"
+  style="
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#fff;
+    z-index:999;
+    overflow:auto;
+  "
+>
+
+  <div style="padding:20px">
+
+    <button
+      id="backToAlbums"
+      class="action light"
+      type="button"
+    >
+      ← Volver
+    </button>
+
+    <h2 id="albumTitle">
+      Álbum
+    </h2>
+
+    <p id="albumInfo"></p>
+
+    <input
+      id="photoUploader"
+      type="file"
+      multiple
+      accept="image/*"
+      style="display:none"
+    >
+
+    <button
+      id="uploadPhotosButton"
+      class="action"
+      type="button"
+    >
+      + Subir fotos
+    </button>
+
+    <div
+      id="photoGrid"
+      style="
+        margin-top:20px;
+        display:grid;
+        gap:12px;
+        grid-template-columns:
+        repeat(auto-fill,minmax(140px,1fr));
+      "
+    ></div>
+
+  </div>
+
+</div>
+  
+  
 </footer>
 
 
@@ -567,6 +629,7 @@ const message =
 
 let currentCategory = "Todas";
 let favoritesOnly = false;
+let categoryList = [];
 
 
 /* API */
@@ -851,34 +914,283 @@ createForm.addEventListener(
   }
 );
 
+/* =========================================
+   CATEGORÍAS DINÁMICAS
+========================================= */
 
-/* CATEGORÍAS */
+async function loadCategories() {
 
-document
-  .querySelectorAll(".category")
-  .forEach(button => {
+  try {
+
+    const data =
+      await api("/categories");
+
+    categoryList =
+      data.categories || [];
+
+    renderCategories();
+    renderCategorySelect();
+
+  } catch (error) {
+
+    console.error(
+      "Error cargando categorías:",
+      error
+    );
+
+  }
+}
+
+
+function renderCategories() {
+
+  const container =
+    document.getElementById("categories");
+
+  container.innerHTML = "";
+
+
+  // TODAS
+
+  const allButton =
+    document.createElement("button");
+
+  allButton.type = "button";
+  allButton.className =
+    "category" +
+    (
+      currentCategory === "Todas"
+        ? " active"
+        : ""
+    );
+
+  allButton.textContent = "Todas";
+
+  allButton.addEventListener(
+    "click",
+    () => {
+
+      currentCategory = "Todas";
+
+      renderCategories();
+      loadAlbums();
+
+    }
+  );
+
+  container.appendChild(allButton);
+
+
+  // CATEGORÍAS DEL USUARIO
+
+  for (const category of categoryList) {
+
+    const button =
+      document.createElement("button");
+
+    button.type = "button";
+
+    button.className =
+      "category" +
+      (
+        currentCategory === category.name
+          ? " active"
+          : ""
+      );
+
+    button.textContent =
+      category.name;
 
     button.addEventListener(
       "click",
       () => {
 
-        document
-          .querySelectorAll(".category")
-          .forEach(item =>
-            item.classList.remove("active")
-          );
-
-        button.classList.add("active");
-
         currentCategory =
-          button.dataset.category;
+          category.name;
 
+        renderCategories();
         loadAlbums();
+
       }
     );
 
-  });
+    container.appendChild(button);
+  }
 
+
+  // NUEVA CATEGORÍA
+
+  const newButton =
+    document.createElement("button");
+
+  newButton.type = "button";
+  newButton.className =
+    "category new-category";
+
+  newButton.textContent =
+    "+ Nueva categoría";
+
+  newButton.addEventListener(
+    "click",
+    openCategoryModal
+  );
+
+  container.appendChild(newButton);
+}
+
+
+function renderCategorySelect() {
+
+  const select =
+    document.getElementById(
+      "albumCategory"
+    );
+
+  select.innerHTML = `
+    <option value="">
+      Selecciona una categoría
+    </option>
+  `;
+
+  for (const category of categoryList) {
+
+    const option =
+      document.createElement("option");
+
+    option.value =
+      category.name;
+
+    option.textContent =
+      category.name;
+
+    select.appendChild(option);
+  }
+}
+
+
+/* MODAL */
+
+const categoryModal =
+  document.getElementById(
+    "categoryModal"
+  );
+
+const categoryForm =
+  document.getElementById(
+    "categoryForm"
+  );
+
+
+function openCategoryModal() {
+
+  categoryModal.classList.add(
+    "show"
+  );
+
+  setTimeout(() => {
+
+    document
+      .getElementById("categoryName")
+      .focus();
+
+  }, 100);
+}
+
+
+function closeCategoryModal() {
+
+  categoryModal.classList.remove(
+    "show"
+  );
+
+  categoryForm.reset();
+}
+
+
+document
+  .getElementById("cancelCategory")
+  .addEventListener(
+    "click",
+    closeCategoryModal
+  );
+
+
+categoryModal.addEventListener(
+  "click",
+  event => {
+
+    if (event.target === categoryModal) {
+      closeCategoryModal();
+    }
+
+  }
+);
+
+
+/* CREAR */
+
+categoryForm.addEventListener(
+  "submit",
+  async event => {
+
+    event.preventDefault();
+
+    const input =
+      document.getElementById(
+        "categoryName"
+      );
+
+    const button =
+      document.getElementById(
+        "saveCategory"
+      );
+
+    const name =
+      input.value.trim();
+
+    if (!name) {
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent =
+      "Creando...";
+
+    try {
+
+      await api(
+        "/categories",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            name
+          })
+        }
+      );
+
+      closeCategoryModal();
+
+      await loadCategories();
+
+    } catch (error) {
+
+      alert(error.message);
+
+    } finally {
+
+      button.disabled = false;
+      button.textContent = "Crear";
+
+    }
+
+  }
+);
 
 /* FAVORITOS */
 
@@ -927,24 +1239,103 @@ searchInput.addEventListener(
 
 /* ABRIR ÁLBUM */
 
-function openAlbum(id) {
+let currentAlbumId = null;
 
-  /*
-    En el siguiente paso esta función
-    abrirá el álbum y permitirá subir
-    fotografías.
-  */
+async function openAlbum(id) {
 
-  console.log(
-    "Abrir álbum:",
-    id
-  );
+  currentAlbumId = id;
+
+  try {
+
+    const data =
+      await api(`/albums/${id}`);
+
+    renderAlbumView(data);
+
+  } catch (error) {
+
+    alert(error.message);
+
+  }
 }
-
 
 /* INICIAR */
 
-loadAlbums();
+async function init() {
+  await loadCategories();
+  await loadAlbums();
+}
+
+
+function renderAlbumView(data) {
+
+  const albumView =
+    document.getElementById(
+      "albumView"
+    );
+
+  document
+    .getElementById("albumTitle")
+    .textContent =
+      data.album.name;
+
+  document
+    .getElementById("albumInfo")
+    .textContent =
+      `${data.photos.length} foto(s)`;
+
+  const grid =
+    document.getElementById(
+      "photoGrid"
+    );
+
+  grid.innerHTML = "";
+
+  for (const photo of data.photos) {
+
+    const image =
+      document.createElement("img");
+
+    image.src =
+      `${API}/images/${
+        encodeURIComponent(
+          photo.r2_key
+        )
+      }`;
+
+    image.loading = "lazy";
+
+    image.style.width = "100%";
+    image.style.aspectRatio = "1";
+    image.style.objectFit = "cover";
+    image.style.borderRadius = "14px";
+
+    grid.appendChild(image);
+  }
+
+  albumView.style.display =
+    "block";
+}
+
+
+document
+  .getElementById(
+    "backToAlbums"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      document
+        .getElementById(
+          "albumView"
+        )
+        .style.display = "none";
+
+    }
+  );
+
+init();
 
 </script>
 
