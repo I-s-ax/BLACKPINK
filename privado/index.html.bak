@@ -2361,6 +2361,75 @@ editAlbumForm.addEventListener(
   }
 );
 
+/* =========================================
+   ELIMINAR ÁLBUM
+========================================= */
+
+document
+  .getElementById("deleteAlbumButton")
+  .addEventListener(
+    "click",
+    async () => {
+
+      if (
+        !currentAlbumId ||
+        !currentAlbum
+      ) {
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          `¿Eliminar "${currentAlbum.name}"?\n\n` +
+          "También se eliminarán todas sus fotografías. " +
+          "Esta acción no se puede deshacer."
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+
+        await api(
+          `/albums/${currentAlbumId}`,
+          {
+            method: "DELETE"
+          }
+        );
+
+        /*
+          Como entramos al álbum creando
+          una entrada de historial,
+          volvemos correctamente a
+          la galería.
+        */
+
+        if (
+          history.state?.view ===
+          "album"
+        ) {
+
+          history.back();
+
+        } else {
+
+          closeAlbumView();
+
+        }
+
+        await loadAlbums();
+
+      } catch (error) {
+
+        alert(error.message);
+
+      }
+
+    }
+  );
+
+
 init();
 
 </script>

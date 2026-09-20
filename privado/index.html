@@ -2217,28 +2217,53 @@ document
 
       select.innerHTML = "";
 
-      for (
-        const category of categoryList
-      ) {
+/*
+  Primero aseguramos que la categoría
+  actual del álbum siempre exista.
+*/
 
-        const option =
-          document.createElement("option");
+if (currentAlbum.category) {
 
-        option.value =
-          category.name;
+  const currentOption =
+    document.createElement("option");
 
-        option.textContent =
-          category.name;
+  currentOption.value =
+    currentAlbum.category;
 
-        if (
-          category.name ===
-          currentAlbum.category
-        ) {
-          option.selected = true;
-        }
+  currentOption.textContent =
+    currentAlbum.category;
 
-        select.appendChild(option);
-      }
+  currentOption.selected = true;
+
+  select.appendChild(currentOption);
+}
+
+
+/*
+  Después agregamos las demás
+  categorías disponibles.
+*/
+
+for (const category of categoryList) {
+
+  if (
+    category.name ===
+    currentAlbum.category
+  ) {
+    continue;
+  }
+
+  const option =
+    document.createElement("option");
+
+  option.value =
+    category.name;
+
+  option.textContent =
+    category.name;
+
+  select.appendChild(option);
+}
 
 
       editAlbumModal
@@ -2313,6 +2338,16 @@ editAlbumForm.addEventListener(
         )
         .value
         .trim();
+        
+        if (!name) {
+  alert("Escribe un nombre para el álbum.");
+  return;
+}
+
+if (!category) {
+  alert("Selecciona una categoría.");
+  return;
+}
 
     button.disabled = true;
     button.textContent =
