@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>BLACKPINK Gallery</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background:
+        linear-gradient(
+          135deg,
+          #ffb4d2 0%,
+          #ff8fbd 45%,
+          #ff69a6 100%
+        );
+      color: #111;
+    }
+
+    header {
+      height: 72px;
+      padding: 0 20px;
+      background: #050505;
+      color: white;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+
+    .menu {
+      font-size: 28px;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 45px 18px;
+    }
+
+    .eyebrow {
+      margin: 0;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 4px;
+    }
+
+    h1 {
+      margin: 5px 0 30px;
+      font-size: clamp(42px, 10vw, 80px);
+      line-height: .9;
+    }
+
+    .status {
+      padding: 22px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.45);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.12);
+    }
+
+    .status strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .ok {
+      color: #126b35;
+    }
+
+    .error {
+      color: #9b1625;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">BLACKPINK</div>
+    <div class="menu">☰</div>
+  </header>
+
+  <main>
+
+    <p class="eyebrow">BLACKPINK</p>
+    <h1>GALERÍA</h1>
+
+    <div class="status">
+      <strong>Conexión con la galería</strong>
+
+      <span id="apiStatus">
+        Comprobando API...
+      </span>
+    </div>
+
+  </main>
+
+  <script>
+    const API = "/privado/api";
+
+    async function comprobarAPI() {
+      const status = document.getElementById("apiStatus");
+
+      try {
+        const response = await fetch(`${API}/albums`, {
+          credentials: "same-origin"
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `HTTP ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+
+        if (!data.ok) {
+          throw new Error(
+            data.error || "La API respondió con un error"
+          );
+        }
+
+        status.className = "ok";
+        status.textContent =
+          `✓ API conectada · ${data.albums.length} álbum(es)`;
+
+      } catch (error) {
+
+        console.error(error);
+
+        status.className = "error";
+        status.textContent =
+          "✕ No se pudo conectar con la API";
+      }
+    }
+
+    comprobarAPI();
+  </script>
+
+</body>
+</html>
