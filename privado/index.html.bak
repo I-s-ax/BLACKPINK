@@ -633,6 +633,31 @@ footer {
     >
       + Subir fotos
     </button>
+    
+    <div
+  style="
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+    flex-wrap:wrap;
+  "
+>
+  <button
+    id="editAlbumButton"
+    class="action light"
+    type="button"
+  >
+    Editar álbum
+  </button>
+
+  <button
+    id="deleteAlbumButton"
+    class="action light"
+    type="button"
+  >
+    Eliminar álbum
+  </button>
+</div>
 
     <div
       id="photoGrid"
@@ -859,6 +884,75 @@ footer {
 
 </div>
 
+
+
+<!-- EDITAR ÁLBUM -->
+
+<div class="modal" id="editAlbumModal">
+
+  <div class="modal-box">
+
+    <h2>Editar álbum</h2>
+
+    <form id="editAlbumForm">
+
+      <div class="field">
+        <label for="editAlbumName">
+          Nombre
+        </label>
+
+        <input
+          id="editAlbumName"
+          maxlength="100"
+          required
+        >
+      </div>
+
+      <div class="field">
+        <label for="editAlbumCategory">
+          Categoría
+        </label>
+
+        <select
+          id="editAlbumCategory"
+          required
+        ></select>
+      </div>
+
+      <div class="field">
+        <label for="editAlbumDescription">
+          Descripción
+        </label>
+
+        <textarea
+          id="editAlbumDescription"
+        ></textarea>
+      </div>
+
+      <div class="modal-actions">
+
+        <button
+          class="btn cancel"
+          id="cancelEditAlbum"
+          type="button"
+        >
+          Cancelar
+        </button>
+
+        <button
+          class="btn save"
+          id="saveEditAlbum"
+          type="submit"
+        >
+          Guardar
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+</div>
 <script>
 
 const API = "/privado/api";
@@ -1493,7 +1587,7 @@ searchInput.addEventListener(
 let currentAlbumId = null;
 let currentPhotos = [];
 let currentPhotoIndex = 0;
-
+let currentAlbum = null;
 
 async function openAlbum(
   id,
@@ -1537,6 +1631,8 @@ async function init() {
 
 
 function renderAlbumView(data) {
+  
+  currentAlbum = data.album;
 
   const albumView =
     document.getElementById(
@@ -1722,7 +1818,8 @@ document
         }
 
         openAlbum(
-          currentAlbumId
+          currentAlbumId,
+          false
         );
 
         loadAlbums();
@@ -2075,6 +2172,191 @@ window.addEventListener(
     */
 
     closeAlbumView();
+
+  }
+);
+
+/* =========================================
+   EDITAR ÁLBUM
+========================================= */
+
+const editAlbumModal =
+  document.getElementById("editAlbumModal");
+
+const editAlbumForm =
+  document.getElementById("editAlbumForm");
+
+
+document
+  .getElementById("editAlbumButton")
+  .addEventListener(
+    "click",
+    () => {
+
+      if (!currentAlbum) {
+        return;
+      }
+
+      document
+        .getElementById("editAlbumName")
+        .value =
+          currentAlbum.name || "";
+
+      document
+        .getElementById(
+          "editAlbumDescription"
+        )
+        .value =
+          currentAlbum.description || "";
+
+
+      const select =
+        document.getElementById(
+          "editAlbumCategory"
+        );
+
+      select.innerHTML = "";
+
+      for (
+        const category of categoryList
+      ) {
+
+        const option =
+          document.createElement("option");
+
+        option.value =
+          category.name;
+
+        option.textContent =
+          category.name;
+
+        if (
+          category.name ===
+          currentAlbum.category
+        ) {
+          option.selected = true;
+        }
+
+        select.appendChild(option);
+      }
+
+
+      editAlbumModal
+        .classList.add("show");
+
+    }
+  );
+
+
+function closeEditAlbum() {
+
+  editAlbumModal
+    .classList.remove("show");
+
+}
+
+
+document
+  .getElementById("cancelEditAlbum")
+  .addEventListener(
+    "click",
+    closeEditAlbum
+  );
+
+
+editAlbumModal.addEventListener(
+  "click",
+  event => {
+
+    if (
+      event.target === editAlbumModal
+    ) {
+      closeEditAlbum();
+    }
+
+  }
+);
+
+
+editAlbumForm.addEventListener(
+  "submit",
+  async event => {
+
+    event.preventDefault();
+
+    if (!currentAlbumId) {
+      return;
+    }
+
+    const button =
+      document.getElementById(
+        "saveEditAlbum"
+      );
+
+    const name =
+      document
+        .getElementById("editAlbumName")
+        .value
+        .trim();
+
+    const category =
+      document
+        .getElementById(
+          "editAlbumCategory"
+        )
+        .value;
+
+    const description =
+      document
+        .getElementById(
+          "editAlbumDescription"
+        )
+        .value
+        .trim();
+
+    button.disabled = true;
+    button.textContent =
+      "Guardando...";
+
+    try {
+
+      await api(
+        `/albums/${currentAlbumId}`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            name,
+            category,
+            description
+          })
+        }
+      );
+
+      closeEditAlbum();
+
+      await openAlbum(
+        currentAlbumId,
+        false
+      );
+
+      await loadAlbums();
+
+    } catch (error) {
+
+      alert(error.message);
+
+    } finally {
+
+      button.disabled = false;
+      button.textContent =
+        "Guardar";
+    }
 
   }
 );
