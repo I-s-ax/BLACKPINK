@@ -1,960 +1,3 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>BLACKPINK Gallery</title>
-
-<style>
-* {
-  box-sizing: border-box;
-}
-
-:root {
-  --black: #080808;
-  --pink: #ff73ac;
-  --light-pink: #ffc0da;
-  --white: #fff;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: Arial, Helvetica, sans-serif;
-  color: #111;
-  background:
-    linear-gradient(
-      145deg,
-      #ffd1e3 0%,
-      #ff9dc4 45%,
-      #ff71aa 100%
-    );
-}
-
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
-
-/* HEADER */
-
-header {
-  height: 72px;
-  padding: 0 20px;
-  background: var(--black);
-  color: white;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.logo {
-  font-weight: 900;
-  letter-spacing: 3px;
-  font-size: 22px;
-}
-
-.menu {
-  border: 0;
-  background: none;
-  color: white;
-  font-size: 28px;
-}
-
-/* CONTENIDO */
-
-main {
-  width: min(1100px, 100%);
-  margin: auto;
-  padding: 42px 18px 80px;
-}
-
-.subtitle {
-  margin: 0;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 5px;
-}
-
-h1 {
-  margin: 4px 0 28px;
-  font-size: clamp(48px, 12vw, 88px);
-  line-height: .9;
-}
-
-/* BUSCADOR */
-
-.search {
-  width: 100%;
-  padding: 16px 18px;
-  border: 0;
-  outline: none;
-  border-radius: 16px;
-  background: rgba(255,255,255,.82);
-  box-shadow: 0 8px 25px rgba(0,0,0,.08);
-}
-
-/* ACCIONES */
-
-.actions {
-  display: flex;
-  gap: 9px;
-  margin: 15px 0;
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-
-.actions button,
-.categories button {
-  border: 0;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.action {
-  padding: 12px 16px;
-  border-radius: 14px;
-  background: #111;
-  color: white;
-  font-weight: 700;
-}
-
-.action.light {
-  background: rgba(255,255,255,.75);
-  color: #111;
-}
-
-/* CATEGORÍAS */
-
-.categories {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 5px 0 22px;
-}
-
-.category {
-  padding: 9px 14px;
-  border-radius: 999px;
-  background: rgba(255,255,255,.55);
-}
-
-.category.active {
-  background: #111;
-  color: white;
-}
-
-/* ÁLBUMES */
-
-.gallery {
-  display: grid;
-  grid-template-columns:
-    repeat(auto-fill, minmax(150px, 1fr));
-  gap: 16px;
-}
-
-.album {
-  overflow: hidden;
-  border-radius: 19px;
-  background: rgba(255,255,255,.62);
-  box-shadow: 0 10px 25px rgba(0,0,0,.12);
-  cursor: pointer;
-}
-
-.cover {
-  aspect-ratio: 1 / 1;
-  background:
-    linear-gradient(
-      135deg,
-      #111,
-      #4a2334
-    );
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: #ff8cbb;
-  font-size: 38px;
-  font-weight: 900;
-}
-
-.cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.album-info {
-  padding: 13px;
-}
-
-.album-name {
-  margin: 0 0 5px;
-  font-weight: 800;
-  font-size: 15px;
-}
-
-.album-count {
-  margin: 0;
-  font-size: 12px;
-  opacity: .6;
-}
-
-/* VACÍO */
-
-.empty {
-  grid-column: 1 / -1;
-  padding: 45px 20px;
-  text-align: center;
-  background: rgba(255,255,255,.35);
-  border-radius: 20px;
-}
-
-.empty strong {
-  display: block;
-  margin-bottom: 7px;
-}
-
-/* MODAL */
-
-.modal {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-
-  display: none;
-  align-items: center;
-  justify-content: center;
-
-  padding: 20px;
-  background: rgba(0,0,0,.65);
-}
-
-.modal.show {
-  display: flex;
-}
-
-.modal-box {
-  width: min(430px, 100%);
-  max-height: 90vh;
-  overflow-y: auto;
-
-  padding: 23px;
-  border-radius: 22px;
-  background: #fff;
-}
-
-.modal-box h2 {
-  margin-top: 0;
-}
-
-.field {
-  margin-bottom: 15px;
-}
-
-.field label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.field input,
-.field select,
-.field textarea {
-  width: 100%;
-  padding: 13px;
-
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  outline: none;
-}
-
-.field textarea {
-  min-height: 90px;
-  resize: vertical;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 9px;
-  margin-top: 20px;
-}
-
-.btn {
-  border: 0;
-  padding: 12px 17px;
-  border-radius: 12px;
-  font-weight: 700;
-}
-
-.btn.cancel {
-  background: #eee;
-}
-
-.btn.save {
-  background: #111;
-  color: white;
-}
-
-.message {
-  margin: 15px 0;
-  font-size: 14px;
-}
-
-.error {
-  color: #a00022;
-}
-
-.loading {
-  text-align: center;
-  padding: 30px;
-}
-
-footer {
-  padding: 35px 20px;
-  text-align: center;
-  background: #080808;
-  color: #aaa;
-  font-size: 12px;
-}
-
-
-/* VISOR DE FOTOGRAFÍAS */
-
-.photo-viewer {
-  position: fixed;
-  inset: 0;
-  z-index: 2000;
-
-  display: none;
-  align-items: center;
-  justify-content: center;
-
-  padding: 55px 15px 25px;
-
-  background: rgba(0,0,0,.96);
-  color: white;
-}
-
-.photo-viewer.show {
-  display: flex;
-}
-
-.viewer-content {
-  width: min(900px, 100%);
-  height: 100%;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-#viewerImage {
-  display: block;
-
-  max-width: 100%;
-  max-height: calc(100vh - 180px);
-
-  object-fit: contain;
-  border-radius: 10px;
-}
-
-.viewer-close {
-  position: absolute;
-  top: 12px;
-  right: 17px;
-
-  border: 0;
-  background: none;
-  color: white;
-
-  font-size: 42px;
-  line-height: 1;
-
-  cursor: pointer;
-}
-
-.viewer-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-
-  width: 45px;
-  height: 55px;
-
-  border: 0;
-  border-radius: 14px;
-
-  background: rgba(255,255,255,.13);
-  color: white;
-
-  font-size: 38px;
-  cursor: pointer;
-}
-
-.viewer-prev {
-  left: 10px;
-}
-
-.viewer-next {
-  right: 10px;
-}
-
-.viewer-bottom {
-  width: 100%;
-  max-width: 700px;
-
-  margin-top: 16px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 15px;
-}
-
-#viewerCounter {
-  font-size: 13px;
-  opacity: .7;
-}
-
-.viewer-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.viewer-actions button {
-  border: 0;
-  padding: 10px 14px;
-
-  border-radius: 999px;
-
-  background: #ff78ad;
-  color: #111;
-
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.viewer-actions .danger {
-  background: rgba(255,255,255,.14);
-  color: white;
-}
-
-.photo-item {
-  position: relative;
-  cursor: pointer;
-}
-
-.photo-item img {
-  display: block;
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 14px;
-}
-
-.photo-favorite-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-
-  width: 30px;
-  height: 30px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  background: rgba(0,0,0,.65);
-  color: #ff78ad;
-
-  font-size: 18px;
-}
-
-@media (max-width: 600px) {
-
-  .viewer-nav {
-    top: auto;
-    bottom: 92px;
-  }
-
-  .viewer-bottom {
-    flex-direction: column;
-  }
-
-  #viewerImage {
-    max-height: calc(100vh - 220px);
-  }
-}
-
-</style>
-</head>
-
-<body>
-
-<header>
-  <div class="logo">BLACKPINK</div>
-
-  <button class="menu" type="button">
-    ☰
-  </button>
-</header>
-
-<main>
-
-  <p class="subtitle">BLACKPINK</p>
-  <h1>GALERÍA</h1>
-
-  <input
-    id="search"
-    class="search"
-    type="search"
-    placeholder="Buscar álbum..."
-  >
-
-  <div class="actions">
-
-    <button
-      class="action light"
-      id="favoritesButton"
-      type="button"
-    >
-      Favoritos
-    </button>
-
-    <button
-      class="action"
-      id="createButton"
-      type="button"
-    >
-      Crear Álbum
-    </button>
-
-    <button
-      class="action light"
-      type="button"
-    >
-      Eliminar Álbumes
-    </button>
-
-    <button
-      class="action light"
-      type="button"
-    >
-      Editar Álbumes
-    </button>
-
-  </div>
-
-  <div class="categories" id="categories">
-
-  <button
-    class="category active"
-    data-category="Todas"
-    type="button"
-  >
-    Todas
-  </button>
-
-  <button
-    class="category new-category"
-    id="newCategoryButton"
-    type="button"
-  >
-    + Nueva categoría
-  </button>
-
-</div>
-
-  <div id="message" class="message"></div>
-
-  <section class="gallery" id="gallery">
-    <div class="loading">
-      Cargando álbumes...
-    </div>
-  </section>
-
-</main>
-
-<footer>
-  BLACKPINK PRIVATE GALLERY
-<!-- VISTA DEL ÁLBUM -->
-
-<div
-  id="albumView"
-  style="
-    display:none;
-    position:fixed;
-    inset:0;
-    background:#fff;
-    z-index:999;
-    overflow:auto;
-  "
->
-
-  <div style="padding:20px">
-
-    <button
-      id="backToAlbums"
-      class="action light"
-      type="button"
-    >
-      ← Volver
-    </button>
-
-    <h2 id="albumTitle">
-      Álbum
-    </h2>
-
-    <p id="albumInfo"></p>
-
-    <input
-      id="photoUploader"
-      type="file"
-      multiple
-      accept="image/*"
-      style="display:none"
-    >
-
-    <button
-      id="uploadPhotosButton"
-      class="action"
-      type="button"
-    >
-      + Subir fotos
-    </button>
-    
-    <div
-  style="
-    display:flex;
-    gap:8px;
-    margin-top:10px;
-    flex-wrap:wrap;
-  "
->
-  <button
-    id="editAlbumButton"
-    class="action light"
-    type="button"
-  >
-    Editar álbum
-  </button>
-
-  <button
-    id="deleteAlbumButton"
-    class="action light"
-    type="button"
-  >
-    Eliminar álbum
-  </button>
-</div>
-
-    <div
-      id="photoGrid"
-      style="
-        margin-top:20px;
-        display:grid;
-        gap:12px;
-        grid-template-columns:
-        repeat(auto-fill,minmax(140px,1fr));
-      "
-    ></div>
-
-  </div>
-
-</div>
-  
-  
-</footer>
-
-
-<!-- CREAR ÁLBUM -->
-
-<div class="modal" id="createModal">
-
-  <div class="modal-box">
-
-    <h2>Crear álbum</h2>
-
-    <form id="createForm">
-
-      <div class="field">
-        <label for="albumName">
-          Nombre
-        </label>
-
-        <input
-          id="albumName"
-          maxlength="100"
-          required
-          placeholder="Ej. Concierto en Seúl"
-        >
-      </div>
-
-      <div class="field">
-
-        <label for="albumCategory">
-          Categoría
-        </label>
-
-        <select id="albumCategory" required>
-  <option value="">
-    Selecciona una categoría
-  </option>
-</select>
-
-      </div>
-
-      <div class="field">
-
-        <label for="albumDescription">
-          Descripción
-        </label>
-
-        <textarea
-          id="albumDescription"
-          placeholder="Descripción opcional..."
-        ></textarea>
-
-      </div>
-
-      <div class="modal-actions">
-
-        <button
-          class="btn cancel"
-          id="cancelCreate"
-          type="button"
-        >
-          Cancelar
-        </button>
-
-        <button
-          class="btn save"
-          id="saveAlbum"
-          type="submit"
-        >
-          Crear
-        </button>
-
-      </div>
-
-    </form>
-
-  </div>
-
-</div>
-
-<!-- CREAR CATEGORÍA -->
-
-<div class="modal" id="categoryModal">
-
-  <div class="modal-box">
-
-    <h2>Nueva categoría</h2>
-
-    <form id="categoryForm">
-
-      <div class="field">
-
-        <label for="categoryName">
-          Nombre
-        </label>
-
-        <input
-          id="categoryName"
-          maxlength="50"
-          required
-          autocomplete="off"
-          placeholder="Ej. Conciertos"
-        >
-
-      </div>
-
-      <div class="modal-actions">
-
-        <button
-          class="btn cancel"
-          id="cancelCategory"
-          type="button"
-        >
-          Cancelar
-        </button>
-
-        <button
-          class="btn save"
-          id="saveCategory"
-          type="submit"
-        >
-          Crear
-        </button>
-
-      </div>
-
-    </form>
-
-  </div>
-
-</div>
-
-
-<!-- VISOR DE FOTOS -->
-
-<div class="photo-viewer" id="photoViewer">
-
-  <button
-    class="viewer-close"
-    id="closeViewer"
-    type="button"
-    aria-label="Cerrar"
-  >
-    ×
-  </button>
-
-  <button
-    class="viewer-nav viewer-prev"
-    id="previousPhoto"
-    type="button"
-    aria-label="Anterior"
-  >
-    ‹
-  </button>
-
-  <div class="viewer-content">
-
-    <img
-      id="viewerImage"
-      src=""
-      alt="Fotografía"
-    >
-
-    <div class="viewer-bottom">
-
-      <span id="viewerCounter"></span>
-
-      <div class="viewer-actions">
-      
-        <button
-  id="fullscreenPhoto"
-  type="button"
-  aria-label="Pantalla completa"
->
-  ⛶
-</button>
-      
-
-        <button
-          id="favoritePhoto"
-          type="button"
-        >
-          ♡ Favorito
-        </button>
-
-        <button
-          id="deletePhoto"
-          class="danger"
-          type="button"
-        >
-          Eliminar
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  <button
-    class="viewer-nav viewer-next"
-    id="nextPhoto"
-    type="button"
-    aria-label="Siguiente"
-  >
-    ›
-  </button>
-
-</div>
-
-
-
-<!-- EDITAR ÁLBUM -->
-
-<div class="modal" id="editAlbumModal">
-
-  <div class="modal-box">
-
-    <h2>Editar álbum</h2>
-
-    <form id="editAlbumForm">
-
-      <div class="field">
-        <label for="editAlbumName">
-          Nombre
-        </label>
-
-        <input
-          id="editAlbumName"
-          maxlength="100"
-          required
-        >
-      </div>
-
-      <div class="field">
-        <label for="editAlbumCategory">
-          Categoría
-        </label>
-
-        <select
-          id="editAlbumCategory"
-          required
-        ></select>
-      </div>
-
-      <div class="field">
-        <label for="editAlbumDescription">
-          Descripción
-        </label>
-
-        <textarea
-          id="editAlbumDescription"
-        ></textarea>
-      </div>
-
-      <div class="modal-actions">
-
-        <button
-          class="btn cancel"
-          id="cancelEditAlbum"
-          type="button"
-        >
-          Cancelar
-        </button>
-
-        <button
-          class="btn save"
-          id="saveEditAlbum"
-          type="submit"
-        >
-          Guardar
-        </button>
-
-      </div>
-
-    </form>
-
-  </div>
-</div>
-<script>
-
 const API = "/privado/api";
 
 const gallery =
@@ -2217,32 +1260,59 @@ document
 
       select.innerHTML = "";
 
-      for (
-        const category of categoryList
-      ) {
+/*
+  Primero aseguramos que la categoría
+  actual del álbum siempre exista.
+*/
 
-        const option =
-          document.createElement("option");
+if (currentAlbum.category) {
 
-        option.value =
-          category.name;
+  const currentOption =
+    document.createElement("option");
 
-        option.textContent =
-          category.name;
+  currentOption.value =
+    currentAlbum.category;
 
-        if (
-          category.name ===
-          currentAlbum.category
-        ) {
-          option.selected = true;
-        }
+  currentOption.textContent =
+    currentAlbum.category;
 
-        select.appendChild(option);
-      }
+  currentOption.selected = true;
+
+  select.appendChild(currentOption);
+}
+
+
+/*
+  Después agregamos las demás
+  categorías disponibles.
+*/
+
+for (const category of categoryList) {
+
+  if (
+    category.name ===
+    currentAlbum.category
+  ) {
+    continue;
+  }
+
+  const option =
+    document.createElement("option");
+
+  option.value =
+    category.name;
+
+  option.textContent =
+    category.name;
+
+  select.appendChild(option);
+}
 
 
       editAlbumModal
         .classList.add("show");
+
+      document.body.style.overflow = "hidden";
 
     }
   );
@@ -2252,6 +1322,8 @@ function closeEditAlbum() {
 
   editAlbumModal
     .classList.remove("show");
+
+  document.body.style.overflow = "";
 
 }
 
@@ -2313,6 +1385,16 @@ editAlbumForm.addEventListener(
         )
         .value
         .trim();
+        
+        if (!name) {
+  alert("Escribe un nombre para el álbum.");
+  return;
+}
+
+if (!category) {
+  alert("Selecciona una categoría.");
+  return;
+}
 
     button.disabled = true;
     button.textContent =
@@ -2320,16 +1402,15 @@ editAlbumForm.addEventListener(
 
     try {
 
+      const albumId = currentAlbumId;
+
       await api(
-        `/albums/${currentAlbumId}`,
+        `/albums/${albumId}`,
         {
           method: "PUT",
-
           headers: {
-            "Content-Type":
-              "application/json"
+            "Content-Type": "application/json"
           },
-
           body: JSON.stringify({
             name,
             category,
@@ -2340,10 +1421,10 @@ editAlbumForm.addEventListener(
 
       closeEditAlbum();
 
-      await openAlbum(
-        currentAlbumId,
-        false
-      );
+      // Recargamos el álbum directamente desde D1 para mostrar
+      // inmediatamente el nombre/categoría/descripción actualizados.
+      const updatedData = await api(`/albums/${albumId}`);
+      renderAlbumView(updatedData);
 
       await loadAlbums();
 
@@ -2431,8 +1512,3 @@ document
 
 
 init();
-
-</script>
-
-</body>
-</html>
