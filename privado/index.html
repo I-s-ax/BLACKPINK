@@ -324,6 +324,179 @@ footer {
   color: #aaa;
   font-size: 12px;
 }
+
+
+/* VISOR DE FOTOGRAFÍAS */
+
+.photo-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+
+  padding: 55px 15px 25px;
+
+  background: rgba(0,0,0,.96);
+  color: white;
+}
+
+.photo-viewer.show {
+  display: flex;
+}
+
+.viewer-content {
+  width: min(900px, 100%);
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#viewerImage {
+  display: block;
+
+  max-width: 100%;
+  max-height: calc(100vh - 180px);
+
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.viewer-close {
+  position: absolute;
+  top: 12px;
+  right: 17px;
+
+  border: 0;
+  background: none;
+  color: white;
+
+  font-size: 42px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.viewer-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 45px;
+  height: 55px;
+
+  border: 0;
+  border-radius: 14px;
+
+  background: rgba(255,255,255,.13);
+  color: white;
+
+  font-size: 38px;
+  cursor: pointer;
+}
+
+.viewer-prev {
+  left: 10px;
+}
+
+.viewer-next {
+  right: 10px;
+}
+
+.viewer-bottom {
+  width: 100%;
+  max-width: 700px;
+
+  margin-top: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+#viewerCounter {
+  font-size: 13px;
+  opacity: .7;
+}
+
+.viewer-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.viewer-actions button {
+  border: 0;
+  padding: 10px 14px;
+
+  border-radius: 999px;
+
+  background: #ff78ad;
+  color: #111;
+
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.viewer-actions .danger {
+  background: rgba(255,255,255,.14);
+  color: white;
+}
+
+.photo-item {
+  position: relative;
+  cursor: pointer;
+}
+
+.photo-item img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.photo-favorite-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: rgba(0,0,0,.65);
+  color: #ff78ad;
+
+  font-size: 18px;
+}
+
+@media (max-width: 600px) {
+
+  .viewer-nav {
+    top: auto;
+    bottom: 92px;
+  }
+
+  .viewer-bottom {
+    flex-direction: column;
+  }
+
+  #viewerImage {
+    max-height: calc(100vh - 220px);
+  }
+}
+
 </style>
 </head>
 
@@ -605,6 +778,75 @@ footer {
     </form>
 
   </div>
+
+</div>
+
+
+<!-- VISOR DE FOTOS -->
+
+<div class="photo-viewer" id="photoViewer">
+
+  <button
+    class="viewer-close"
+    id="closeViewer"
+    type="button"
+    aria-label="Cerrar"
+  >
+    ×
+  </button>
+
+  <button
+    class="viewer-nav viewer-prev"
+    id="previousPhoto"
+    type="button"
+    aria-label="Anterior"
+  >
+    ‹
+  </button>
+
+  <div class="viewer-content">
+
+    <img
+      id="viewerImage"
+      src=""
+      alt="Fotografía"
+    >
+
+    <div class="viewer-bottom">
+
+      <span id="viewerCounter"></span>
+
+      <div class="viewer-actions">
+
+        <button
+          id="favoritePhoto"
+          type="button"
+        >
+          ♡ Favorito
+        </button>
+
+        <button
+          id="deletePhoto"
+          class="danger"
+          type="button"
+        >
+          Eliminar
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <button
+    class="viewer-nav viewer-next"
+    id="nextPhoto"
+    type="button"
+    aria-label="Siguiente"
+  >
+    ›
+  </button>
 
 </div>
 
@@ -1240,6 +1482,9 @@ searchInput.addEventListener(
 /* ABRIR ÁLBUM */
 
 let currentAlbumId = null;
+let currentPhotos = [];
+let currentPhotoIndex = 0;
+
 
 async function openAlbum(id) {
 
@@ -1291,27 +1536,53 @@ function renderAlbumView(data) {
 
   grid.innerHTML = "";
 
-  for (const photo of data.photos) {
+  currentPhotos = data.photos || [];
 
-    const image =
-      document.createElement("img");
+for (let i = 0; i < currentPhotos.length; i++) {
 
-    image.src =
-      `${API}/images/${
-        encodeURIComponent(
-          photo.r2_key
-        )
-      }`;
+  const photo = currentPhotos[i];
 
-    image.loading = "lazy";
+  const item =
+    document.createElement("div");
 
-    image.style.width = "100%";
-    image.style.aspectRatio = "1";
-    image.style.objectFit = "cover";
-    image.style.borderRadius = "14px";
+  item.className = "photo-item";
 
-    grid.appendChild(image);
+  const image =
+    document.createElement("img");
+
+  image.src =
+    `${API}/images/${
+      encodeURIComponent(photo.r2_key)
+    }`;
+
+  image.loading = "lazy";
+  image.alt =
+    photo.title || photo.filename || "Fotografía";
+
+  item.appendChild(image);
+
+
+  if (Number(photo.favorite) === 1) {
+
+    const heart =
+      document.createElement("div");
+
+    heart.className =
+      "photo-favorite-badge";
+
+    heart.textContent = "♥";
+
+    item.appendChild(heart);
   }
+
+
+  item.addEventListener(
+    "click",
+    () => openPhotoViewer(i)
+  );
+
+  grid.appendChild(item);
+}
 
   albumView.style.display =
     "block";
@@ -1421,6 +1692,270 @@ document
 
       }
 
+    }
+  );
+  
+  
+  
+/* =========================================
+   VISOR DE FOTOGRAFÍAS
+========================================= */
+
+const photoViewer =
+  document.getElementById("photoViewer");
+
+const viewerImage =
+  document.getElementById("viewerImage");
+
+const viewerCounter =
+  document.getElementById("viewerCounter");
+
+const favoritePhotoButton =
+  document.getElementById("favoritePhoto");
+
+
+function openPhotoViewer(index) {
+
+  if (!currentPhotos.length) {
+    return;
+  }
+
+  currentPhotoIndex = index;
+
+  updatePhotoViewer();
+
+  photoViewer.classList.add("show");
+
+  document.body.style.overflow = "hidden";
+}
+
+
+function updatePhotoViewer() {
+
+  const photo =
+    currentPhotos[currentPhotoIndex];
+
+  if (!photo) {
+    return;
+  }
+
+  viewerImage.src =
+    `${API}/images/${
+      encodeURIComponent(photo.r2_key)
+    }`;
+
+  viewerCounter.textContent =
+    `${currentPhotoIndex + 1} / ${currentPhotos.length}`;
+
+  favoritePhotoButton.textContent =
+    Number(photo.favorite) === 1
+      ? "♥ Favorito"
+      : "♡ Favorito";
+}
+
+
+function closePhotoViewer() {
+
+  photoViewer.classList.remove("show");
+
+  viewerImage.src = "";
+
+  document.body.style.overflow = "";
+}
+
+
+function showPreviousPhoto() {
+
+  if (!currentPhotos.length) {
+    return;
+  }
+
+  currentPhotoIndex =
+    (
+      currentPhotoIndex -
+      1 +
+      currentPhotos.length
+    ) % currentPhotos.length;
+
+  updatePhotoViewer();
+}
+
+
+function showNextPhoto() {
+
+  if (!currentPhotos.length) {
+    return;
+  }
+
+  currentPhotoIndex =
+    (
+      currentPhotoIndex + 1
+    ) % currentPhotos.length;
+
+  updatePhotoViewer();
+}
+
+
+document
+  .getElementById("closeViewer")
+  .addEventListener(
+    "click",
+    closePhotoViewer
+  );
+
+
+document
+  .getElementById("previousPhoto")
+  .addEventListener(
+    "click",
+    showPreviousPhoto
+  );
+
+
+document
+  .getElementById("nextPhoto")
+  .addEventListener(
+    "click",
+    showNextPhoto
+  );
+
+
+/* FAVORITO */
+
+favoritePhotoButton.addEventListener(
+  "click",
+  async () => {
+
+    const photo =
+      currentPhotos[currentPhotoIndex];
+
+    if (!photo) {
+      return;
+    }
+
+    const newFavorite =
+      Number(photo.favorite) !== 1;
+
+    favoritePhotoButton.disabled = true;
+
+    try {
+
+      await api(
+        `/photos/${photo.id}`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            favorite: newFavorite
+          })
+        }
+      );
+
+      photo.favorite =
+        newFavorite ? 1 : 0;
+
+      updatePhotoViewer();
+
+      // Actualiza los corazones de la cuadrícula
+      const data =
+        await api(
+          `/albums/${currentAlbumId}`
+        );
+
+      renderAlbumView(data);
+
+    } catch (error) {
+
+      alert(error.message);
+
+    } finally {
+
+      favoritePhotoButton.disabled =
+        false;
+    }
+  }
+);
+
+
+/* ELIMINAR FOTO */
+
+document
+  .getElementById("deletePhoto")
+  .addEventListener(
+    "click",
+    async () => {
+
+      const photo =
+        currentPhotos[currentPhotoIndex];
+
+      if (!photo) {
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          "¿Quieres eliminar esta fotografía? Esta acción no se puede deshacer."
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+
+        await api(
+          `/photos/${photo.id}`,
+          {
+            method: "DELETE"
+          }
+        );
+
+        currentPhotos.splice(
+          currentPhotoIndex,
+          1
+        );
+
+        if (!currentPhotos.length) {
+
+          closePhotoViewer();
+
+          await openAlbum(
+            currentAlbumId
+          );
+
+          await loadAlbums();
+
+          return;
+        }
+
+        if (
+          currentPhotoIndex >=
+          currentPhotos.length
+        ) {
+          currentPhotoIndex =
+            currentPhotos.length - 1;
+        }
+
+        updatePhotoViewer();
+
+        const data =
+          await api(
+            `/albums/${currentAlbumId}`
+          );
+
+        renderAlbumView(data);
+
+        await loadAlbums();
+
+      } catch (error) {
+
+        alert(error.message);
+      }
     }
   );
 
