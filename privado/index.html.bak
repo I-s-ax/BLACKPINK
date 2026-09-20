@@ -817,6 +817,15 @@ footer {
       <span id="viewerCounter"></span>
 
       <div class="viewer-actions">
+      
+        <button
+  id="fullscreenPhoto"
+  type="button"
+  aria-label="Pantalla completa"
+>
+  ⛶
+</button>
+      
 
         <button
           id="favoritePhoto"
@@ -1486,7 +1495,10 @@ let currentPhotos = [];
 let currentPhotoIndex = 0;
 
 
-async function openAlbum(id) {
+async function openAlbum(
+  id,
+  addHistory = true
+) {
 
   currentAlbumId = id;
 
@@ -1497,13 +1509,25 @@ async function openAlbum(id) {
 
     renderAlbumView(data);
 
+    if (addHistory) {
+
+      history.pushState(
+        {
+          view: "album",
+          albumId: id
+        },
+        "",
+        `#album-${id}`
+      );
+
+    }
+
   } catch (error) {
 
     alert(error.message);
 
   }
 }
-
 /* INICIAR */
 
 async function init() {
@@ -1590,21 +1614,38 @@ for (let i = 0; i < currentPhotos.length; i++) {
 
 
 document
-  .getElementById(
-    "backToAlbums"
-  )
+  .getElementById("backToAlbums")
   .addEventListener(
     "click",
     () => {
 
-      document
-        .getElementById(
-          "albumView"
-        )
-        .style.display = "none";
+      if (
+        history.state?.view === "album"
+      ) {
+
+        history.back();
+
+      } else {
+
+        closeAlbumView();
+
+      }
 
     }
   );
+
+
+function closeAlbumView() {
+
+  document
+    .getElementById("albumView")
+    .style.display = "none";
+
+  currentAlbumId = null;
+  currentPhotos = [];
+
+  window.scrollTo(0, 0);
+}
   
   
 document
@@ -1694,6 +1735,349 @@ document
 
     }
   );
+  
+  
+  
+/* =========================================
+   VISOR DE FOTOGRAFÍAS
+========================================= */
+
+const photoViewer =
+  document.getElementById("photoViewer");
+
+const viewerImage =
+  document.getElementById("viewerImage");
+
+const viewerCounter =
+  document.getElementById("viewerCounter");
+
+const favoritePhotoButton =
+  document.getElementById("favoritePhoto");
+
+
+function openPhotoViewer(index) {
+
+  if (!currentPhotos.length) {
+    return;
+  }
+
+  currentPhotoIndex = index;
+
+  updatePhotoViewer();
+
+  photoViewer.classList.add("show");
+
+  document.body.style.overflow = "hidden";
+}
+
+
+function updatePhotoViewer() {
+
+  const photo =
+    currentPhotos[currentPhotoIndex];
+
+  if (!photo) {
+    return;
+  }
+
+  viewerImage.src =
+    `${API}/images/${
+      encodeURIComponent(photo.r2_key)
+    }`;
+
+  viewerCounter.textContent =
+    `${currentPhotoIndex + 1} / ${currentPhotos.length}`;
+
+  favoritePhotoButton.textContent =
+    Number(photo.favorite) === 1
+      ? "♥ Favorito"
+      : "♡ Favorito";
+}
+
+
+function closePhotoViewer() {
+
+  photoViewer.classList.remove("show");
+
+  viewerImage.src = "";
+
+  document.body.style.overflow = "";
+}
+
+
+function showPreviousPhoto() {
+
+  if (!currentPhotos.length) {
+    return;
+  }
+
+  currentPhotoIndex =
+    (
+      currentPhotoIndex -
+      1 +
+      currentPhotos.length
+    ) % currentPhotos.length;
+
+  updatePhotoViewer();
+}
+
+
+function showNextPhoto() {
+
+  if (!currentPhotos.length) {
+    return;
+  }
+
+  currentPhotoIndex =
+    (
+      currentPhotoIndex + 1
+    ) % currentPhotos.length;
+
+  updatePhotoViewer();
+}
+
+
+document
+  .getElementById("closeViewer")
+  .addEventListener(
+    "click",
+    closePhotoViewer
+  );
+
+
+document
+  .getElementById("previousPhoto")
+  .addEventListener(
+    "click",
+    showPreviousPhoto
+  );
+
+
+document
+  .getElementById("nextPhoto")
+  .addEventListener(
+    "click",
+    showNextPhoto
+  );
+
+
+/* FAVORITO */
+
+favoritePhotoButton.addEventListener(
+  "click",
+  async () => {
+
+    const photo =
+      currentPhotos[currentPhotoIndex];
+
+    if (!photo) {
+      return;
+    }
+
+    const newFavorite =
+      Number(photo.favorite) !== 1;
+
+    favoritePhotoButton.disabled = true;
+
+    try {
+
+      await api(
+        `/photos/${photo.id}`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            favorite: newFavorite
+          })
+        }
+      );
+
+      photo.favorite =
+        newFavorite ? 1 : 0;
+
+      updatePhotoViewer();
+
+      // Actualiza los corazones de la cuadrícula
+      const data =
+        await api(
+          `/albums/${currentAlbumId}`
+        );
+
+      renderAlbumView(data);
+
+    } catch (error) {
+
+      alert(error.message);
+
+    } finally {
+
+      favoritePhotoButton.disabled =
+        false;
+    }
+  }
+);
+
+
+/* ELIMINAR FOTO */
+
+document
+  .getElementById("deletePhoto")
+  .addEventListener(
+    "click",
+    async () => {
+
+      const photo =
+        currentPhotos[currentPhotoIndex];
+
+      if (!photo) {
+        return;
+      }
+
+      const confirmed =
+        confirm(
+          "¿Quieres eliminar esta fotografía? Esta acción no se puede deshacer."
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+
+        await api(
+          `/photos/${photo.id}`,
+          {
+            method: "DELETE"
+          }
+        );
+
+        currentPhotos.splice(
+          currentPhotoIndex,
+          1
+        );
+
+        if (!currentPhotos.length) {
+
+          closePhotoViewer();
+
+          await openAlbum(
+            currentAlbumId
+          );
+
+          await loadAlbums();
+
+          return;
+        }
+
+        if (
+          currentPhotoIndex >=
+          currentPhotos.length
+        ) {
+          currentPhotoIndex =
+            currentPhotos.length - 1;
+        }
+
+        updatePhotoViewer();
+
+        const data =
+          await api(
+            `/albums/${currentAlbumId}`
+          );
+
+        renderAlbumView(data);
+
+        await loadAlbums();
+
+      } catch (error) {
+
+        alert(error.message);
+      }
+    }
+  );
+  
+  
+document
+  .getElementById("fullscreenPhoto")
+  .addEventListener(
+    "click",
+    async () => {
+
+      try {
+
+        if (!document.fullscreenElement) {
+
+          await viewerImage.requestFullscreen();
+
+        } else {
+
+          await document.exitFullscreen();
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Pantalla completa no disponible:",
+          error
+        );
+
+      }
+
+    }
+  );
+  
+  
+  
+window.addEventListener(
+  "popstate",
+  event => {
+
+    /*
+      Si el visor de fotografía está abierto,
+      primero lo cerramos.
+    */
+
+    if (
+      photoViewer.classList.contains("show")
+    ) {
+
+      closePhotoViewer();
+    }
+
+
+    /*
+      Si el historial apunta a un álbum,
+      mostramos ese álbum.
+    */
+
+    if (
+      event.state?.view === "album" &&
+      event.state.albumId
+    ) {
+
+      openAlbum(
+        event.state.albumId,
+        false
+      );
+
+      return;
+    }
+
+
+    /*
+      De lo contrario mostramos
+      la galería principal.
+    */
+
+    closeAlbumView();
+
+  }
+);
 
 init();
 
