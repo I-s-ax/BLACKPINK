@@ -895,19 +895,31 @@ const favoritePhotoButton =
   document.getElementById("favoritePhoto");
 
 
-function openPhotoViewer(index) {
-
+function openPhotoViewer(
+  index,
+  addHistory = true
+) {
   if (!currentPhotos.length) {
     return;
   }
 
   currentPhotoIndex = index;
-
   updatePhotoViewer();
 
   photoViewer.classList.add("show");
-
   document.body.style.overflow = "hidden";
+
+  if (addHistory) {
+    history.pushState(
+      {
+        view: "photo",
+        albumId: currentAlbumId,
+        photoIndex: index
+      },
+      "",
+      `#album-${currentAlbumId}-photo-${index + 1}`
+    );
+  }
 }
 
 
@@ -995,7 +1007,17 @@ document
   .getElementById("closeViewer")
   .addEventListener(
     "click",
-    closePhotoViewer
+    () => {
+
+      if (
+        history.state?.view === "photo"
+      ) {
+        history.back();
+      } else {
+        closePhotoViewer();
+      }
+
+    }
   );
 
 
@@ -1248,28 +1270,35 @@ window.addEventListener(
   "popstate",
   event => {
 
-    /*
-      Si el visor de fotografía está abierto,
-      primero lo cerramos.
-    */
-
+    // FOTO
     if (
-      photoViewer.classList.contains("show")
+      event.state?.view === "photo" &&
+      event.state.albumId
     ) {
 
-      closePhotoViewer();
+      openAlbum(
+        event.state.albumId,
+        false
+      ).then(() => {
+
+        openPhotoViewer(
+          event.state.photoIndex || 0,
+          false
+        );
+
+      });
+
+      return;
     }
 
 
-    /*
-      Si el historial apunta a un álbum,
-      mostramos ese álbum.
-    */
-
+    // ÁLBUM
     if (
       event.state?.view === "album" &&
       event.state.albumId
     ) {
+
+      closePhotoViewer();
 
       openAlbum(
         event.state.albumId,
@@ -1280,11 +1309,8 @@ window.addEventListener(
     }
 
 
-    /*
-      De lo contrario mostramos
-      la galería principal.
-    */
-
+    // GALERÍA
+    closePhotoViewer();
     closeAlbumView();
 
   }

@@ -895,19 +895,31 @@ const favoritePhotoButton =
   document.getElementById("favoritePhoto");
 
 
-function openPhotoViewer(index) {
-
+function openPhotoViewer(
+  index,
+  addHistory = true
+) {
   if (!currentPhotos.length) {
     return;
   }
 
   currentPhotoIndex = index;
-
   updatePhotoViewer();
 
   photoViewer.classList.add("show");
-
   document.body.style.overflow = "hidden";
+
+  if (addHistory) {
+    history.pushState(
+      {
+        view: "photo",
+        albumId: currentAlbumId,
+        photoIndex: index
+      },
+      "",
+      `#album-${currentAlbumId}-photo-${index + 1}`
+    );
+  }
 }
 
 
@@ -915,6 +927,20 @@ function updatePhotoViewer() {
 
   const photo =
     currentPhotos[currentPhotoIndex];
+    
+    const coverButton =
+  document.getElementById("setCoverPhoto");
+
+if (
+  currentAlbum &&
+  currentAlbum.cover_key === photo.r2_key
+) {
+  coverButton.textContent = "✓ Es portada";
+  coverButton.disabled = true;
+} else {
+  coverButton.textContent = "♡ Portada";
+  coverButton.disabled = false;
+}
 
   if (!photo) {
     return;
@@ -998,6 +1024,63 @@ document
   .addEventListener(
     "click",
     showNextPhoto
+  );
+
+
+/* PORTADA DEL ÁLBUM */
+
+document
+  .getElementById("setCoverPhoto")
+  .addEventListener(
+    "click",
+    async () => {
+
+      const photo =
+        currentPhotos[currentPhotoIndex];
+
+      if (!photo || !currentAlbumId) {
+        return;
+      }
+
+      const button =
+        document.getElementById("setCoverPhoto");
+
+      button.disabled = true;
+      button.textContent = "Cambiando...";
+
+      try {
+
+        await api(
+          `/albums/${currentAlbumId}/cover`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              photoId: photo.id
+            })
+          }
+        );
+
+        const data =
+          await api(
+            `/albums/${currentAlbumId}`
+          );
+
+        renderAlbumView(data);
+        await loadAlbums();
+
+      } catch (error) {
+
+        alert(error.message);
+
+      } finally {
+
+        updatePhotoViewer();
+
+      }
+    }
   );
 
 
@@ -1177,28 +1260,35 @@ window.addEventListener(
   "popstate",
   event => {
 
-    /*
-      Si el visor de fotografía está abierto,
-      primero lo cerramos.
-    */
-
+    // FOTO
     if (
-      photoViewer.classList.contains("show")
+      event.state?.view === "photo" &&
+      event.state.albumId
     ) {
 
-      closePhotoViewer();
+      openAlbum(
+        event.state.albumId,
+        false
+      ).then(() => {
+
+        openPhotoViewer(
+          event.state.photoIndex || 0,
+          false
+        );
+
+      });
+
+      return;
     }
 
 
-    /*
-      Si el historial apunta a un álbum,
-      mostramos ese álbum.
-    */
-
+    // ÁLBUM
     if (
       event.state?.view === "album" &&
       event.state.albumId
     ) {
+
+      closePhotoViewer();
 
       openAlbum(
         event.state.albumId,
@@ -1209,11 +1299,8 @@ window.addEventListener(
     }
 
 
-    /*
-      De lo contrario mostramos
-      la galería principal.
-    */
-
+    // GALERÍA
+    closePhotoViewer();
     closeAlbumView();
 
   }
