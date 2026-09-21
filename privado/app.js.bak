@@ -915,20 +915,6 @@ function updatePhotoViewer() {
 
   const photo =
     currentPhotos[currentPhotoIndex];
-    
-    const coverButton =
-  document.getElementById("setCoverPhoto");
-
-if (
-  currentAlbum &&
-  currentAlbum.cover_key === photo.r2_key
-) {
-  coverButton.textContent = "✓ Es portada";
-  coverButton.disabled = true;
-} else {
-  coverButton.textContent = "♡ Portada";
-  coverButton.disabled = false;
-}
 
   if (!photo) {
     return;
@@ -1012,63 +998,6 @@ document
   .addEventListener(
     "click",
     showNextPhoto
-  );
-
-
-/* PORTADA DEL ÁLBUM */
-
-document
-  .getElementById("setCoverPhoto")
-  .addEventListener(
-    "click",
-    async () => {
-
-      const photo =
-        currentPhotos[currentPhotoIndex];
-
-      if (!photo || !currentAlbumId) {
-        return;
-      }
-
-      const button =
-        document.getElementById("setCoverPhoto");
-
-      button.disabled = true;
-      button.textContent = "Cambiando...";
-
-      try {
-
-        await api(
-          `/albums/${currentAlbumId}/cover`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              photoId: photo.id
-            })
-          }
-        );
-
-        const data =
-          await api(
-            `/albums/${currentAlbumId}`
-          );
-
-        renderAlbumView(data);
-        await loadAlbums();
-
-      } catch (error) {
-
-        alert(error.message);
-
-      } finally {
-
-        updatePhotoViewer();
-
-      }
-    }
   );
 
 
