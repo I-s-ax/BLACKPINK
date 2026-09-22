@@ -16,12 +16,107 @@
 
   <button
     class="menu"
+    id="settingsMenuButton"
     type="button"
-    aria-label="Menú"
+    aria-label="Abrir ajustes"
+    aria-expanded="false"
+    aria-controls="settingsOverlay"
   >
     ☰
   </button>
 </header>
+
+<!-- AJUSTES -->
+
+<div
+  class="settings-overlay"
+  id="settingsOverlay"
+  hidden
+>
+  <button
+    class="settings-backdrop"
+    id="settingsBackdrop"
+    type="button"
+    aria-label="Cerrar ajustes"
+  ></button>
+
+  <aside
+    class="settings-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="settingsTitle"
+  >
+    <div class="settings-header">
+      <div>
+        <span class="settings-kicker">
+          BLACKPINK
+        </span>
+
+        <h2 id="settingsTitle">
+          Ajustes
+        </h2>
+      </div>
+
+      <button
+        class="settings-close"
+        id="closeSettings"
+        type="button"
+        aria-label="Cerrar ajustes"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="settings-card">
+      <div class="settings-card-heading">
+        <div>
+          <span class="settings-label">
+            PRESENTACIÓN
+          </span>
+
+          <strong>
+            Cambio automático
+          </strong>
+        </div>
+
+        <span
+          class="settings-speed-value"
+          id="slideshowSpeedValue"
+        >
+          5 s
+        </span>
+      </div>
+
+      <label
+        class="settings-range-label"
+        for="slideshowSpeed"
+      >
+        Tiempo entre cada fotografía
+      </label>
+
+      <input
+        id="slideshowSpeed"
+        class="settings-range"
+        type="range"
+        min="2"
+        max="10"
+        step="1"
+        value="5"
+      >
+
+      <div class="settings-range-scale">
+        <span>2 s</span>
+        <span>Rápido</span>
+        <span>10 s</span>
+      </div>
+
+      <p class="settings-help">
+        Usa ▶️ en el visor para iniciar la presentación.
+        El botón cambiará a ⏸️ mientras esté reproduciéndose.
+      </p>
+    </div>
+  </aside>
+</div>
 
 <main>
 
@@ -491,6 +586,16 @@
       <span id="viewerCounter"></span>
 
       <div class="viewer-actions">
+
+        <button
+          id="slideshowToggle"
+          class="viewer-action-button slideshow-toggle"
+          type="button"
+          aria-label="Iniciar presentación automática"
+          title="Presentación automática"
+        >
+          ▶️
+        </button>
       
         <button
   id="fullscreenPhoto"
