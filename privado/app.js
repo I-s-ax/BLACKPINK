@@ -89,6 +89,8 @@ async function loadAlbums() {
     );
 
     renderAlbums(data.albums);
+    
+    await loadFavoritePhotos();
 
   } catch (error) {
 
@@ -729,6 +731,16 @@ async function init() {
 function renderAlbumView(data) {
   
   currentAlbum = data.album;
+  
+  const favoriteAlbumButton =
+  document.getElementById(
+    "favoriteAlbumButton"
+  );
+
+favoriteAlbumButton.textContent =
+  Number(currentAlbum.favorite) === 1
+    ? "♥ Álbum favorito"
+    : "♡ Álbum favorito";
 
   const albumView =
     document.getElementById(
@@ -1906,5 +1918,219 @@ document
 
     }
   );
+
+
+/* =========================================
+   ÁLBUM FAVORITO
+========================================= */
+
+document
+  .getElementById("favoriteAlbumButton")
+  .addEventListener(
+    "click",
+    async () => {
+
+      if (!currentAlbumId || !currentAlbum) {
+        return;
+      }
+
+      const button =
+        document.getElementById(
+          "favoriteAlbumButton"
+        );
+
+      const favorite =
+        Number(currentAlbum.favorite) !== 1;
+
+      button.disabled = true;
+
+      try {
+
+        await api(
+          `/albums/${currentAlbumId}`,
+          {
+            method: "PUT",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body: JSON.stringify({
+              favorite
+            })
+          }
+        );
+
+        const data =
+          await api(
+            `/albums/${currentAlbumId}`
+          );
+
+        renderAlbumView(data);
+
+        await loadAlbums();
+
+      } catch (error) {
+
+        alert(error.message);
+
+      } finally {
+
+        button.disabled = false;
+
+      }
+
+    }
+  );
+  
+  
+/* =========================================
+   FOTOS FAVORITAS
+========================================= */
+
+async function loadFavoritePhotos() {
+
+  const section =
+    document.getElementById(
+      "favoritePhotosSection"
+    );
+
+  const grid =
+    document.getElementById(
+      "favoritePhotosGrid"
+    );
+
+  if (!favoritesOnly) {
+
+    section.style.display = "none";
+    grid.innerHTML = "";
+
+    return;
+  }
+
+  section.style.display = "block";
+
+  try {
+
+    const data =
+      await api(
+        "/photos?favorites=1"
+      );
+
+    renderFavoritePhotos(
+      data.photos || []
+    );
+
+  } catch (error) {
+
+    grid.innerHTML = `
+      <div class="empty">
+        Error cargando fotografías.
+      </div>
+    `;
+
+  }
+}
+
+
+function renderFavoritePhotos(photos) {
+
+  const grid =
+    document.getElementById(
+      "favoritePhotosGrid"
+    );
+
+  grid.innerHTML = "";
+
+  if (!photos.length) {
+
+    grid.innerHTML = `
+      <div class="empty">
+        <strong>
+          No tienes fotos favoritas
+        </strong>
+        Marca una fotografía con ♥ para que aparezca aquí.
+      </div>
+    `;
+
+    return;
+  }
+
+
+  for (const photo of photos) {
+
+    const item =
+      document.createElement("div");
+
+    item.className =
+      "photo-item";
+
+
+    const image =
+      document.createElement("img");
+
+    image.src =
+      `${API}/images/${
+        encodeURIComponent(
+          photo.r2_key
+        )
+      }`;
+
+    image.loading = "lazy";
+
+    image.alt =
+      photo.title ||
+      photo.filename ||
+      "Fotografía";
+
+
+    const heart =
+      document.createElement("div");
+
+    heart.className =
+      "photo-favorite-badge";
+
+    heart.textContent = "♥";
+
+
+    item.appendChild(image);
+    item.appendChild(heart);
+
+
+    item.addEventListener(
+      "click",
+      async () => {
+
+        /*
+         * Abrimos primero el álbum.
+         * Así también funciona correctamente
+         * el botón Atrás.
+         */
+        await openAlbum(
+          photo.album_id
+        );
+
+        const index =
+          currentPhotos.findIndex(
+            currentPhoto =>
+              Number(currentPhoto.id) ===
+              Number(photo.id)
+          );
+
+        if (index !== -1) {
+
+          openPhotoViewer(index);
+
+        }
+
+      }
+    );
+
+
+    grid.appendChild(item);
+
+  }
+}
 
 init();
