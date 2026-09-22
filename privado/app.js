@@ -758,10 +758,16 @@ let currentPhotos = [];
 let currentPhotoIndex = 0;
 let currentAlbum = null;
 
+let photoSelectionMode = false;
+const selectedPhotoIds = new Set();
+
 async function openAlbum(
   id,
   addHistory = true
 ) {
+
+  photoSelectionMode = false;
+  selectedPhotoIds.clear();
 
   currentAlbumId = id;
 
@@ -894,6 +900,24 @@ function renderAlbumView(data) {
   albumPhotoCount.textContent =
     String(photoTotal);
 
+  const selectPhotosButton =
+    document.getElementById(
+      "selectPhotosButton"
+    );
+
+  selectPhotosButton.disabled =
+    photoTotal === 0;
+
+  selectPhotosButton.textContent =
+    photoSelectionMode
+      ? "Cancelar"
+      : "Seleccionar";
+
+  selectPhotosButton.classList.toggle(
+    "is-active",
+    photoSelectionMode
+  );
+
 
   if (currentAlbum.cover_key) {
 
@@ -959,6 +983,21 @@ function renderAlbumView(data) {
       item.className =
         "photo-item";
 
+      item.dataset.photoId =
+        String(photo.id);
+
+      item.classList.toggle(
+        "selection-enabled",
+        photoSelectionMode
+      );
+
+      item.classList.toggle(
+        "selected",
+        selectedPhotoIds.has(
+          Number(photo.id)
+        )
+      );
+
 
       const image =
         document.createElement(
@@ -980,6 +1019,21 @@ function renderAlbumView(data) {
         "Fotografía";
 
       item.appendChild(image);
+
+      const selectionIndicator =
+        document.createElement(
+          "div"
+        );
+
+      selectionIndicator.className =
+        "photo-select-indicator";
+
+      selectionIndicator.textContent =
+        "✓";
+
+      item.appendChild(
+        selectionIndicator
+      );
 
 
       if (
@@ -1003,7 +1057,20 @@ function renderAlbumView(data) {
 
       item.addEventListener(
         "click",
-        () => openPhotoViewer(i)
+        () => {
+
+          if (photoSelectionMode) {
+
+            togglePhotoSelection(
+              photo.id
+            );
+
+            return;
+          }
+
+          openPhotoViewer(i);
+
+        }
       );
 
       grid.appendChild(item);
@@ -1012,6 +1079,8 @@ function renderAlbumView(data) {
 
   }
 
+
+  updatePhotoSelectionUI();
 
   albumView.style.display =
     "block";
@@ -1028,6 +1097,11 @@ document
   .addEventListener(
     "click",
     () => {
+
+      if (photoSelectionMode) {
+        exitPhotoSelectionMode();
+        return;
+      }
 
       if (
         history.state?.view === "album"
@@ -1049,6 +1123,9 @@ function closeAlbumView() {
 
   stopSlideshow();
 
+  photoSelectionMode = false;
+  selectedPhotoIds.clear();
+
   document
     .getElementById("albumView")
     .style.display = "none";
@@ -1061,6 +1138,488 @@ function closeAlbumView() {
 }
   
   
+/* =========================================
+   SELECCIÓN MÚLTIPLE DE FOTOS
+========================================= */
+
+function updatePhotoSelectionUI() {
+
+  const albumView =
+    document.getElementById(
+      "albumView"
+    );
+
+  const bar =
+    document.getElementById(
+      "photoSelectionBar"
+    );
+
+  const count =
+    document.getElementById(
+      "photoSelectionCount"
+    );
+
+  const selectButton =
+    document.getElementById(
+      "selectPhotosButton"
+    );
+
+  const selectAllButton =
+    document.getElementById(
+      "selectAllPhotos"
+    );
+
+  const favoriteButton =
+    document.getElementById(
+      "favoriteSelectedPhotos"
+    );
+
+  const deleteButton =
+    document.getElementById(
+      "deleteSelectedPhotos"
+    );
+
+
+  albumView.classList.toggle(
+    "selection-active",
+    photoSelectionMode
+  );
+
+  bar.hidden =
+    !photoSelectionMode;
+
+  selectButton.classList.toggle(
+    "is-active",
+    photoSelectionMode
+  );
+
+  selectButton.textContent =
+    photoSelectionMode
+      ? "Cancelar"
+      : "Seleccionar";
+
+
+  const selectedCount =
+    selectedPhotoIds.size;
+
+  count.textContent =
+    `${selectedCount} seleccionada${
+      selectedCount === 1
+        ? ""
+        : "s"
+    }`;
+
+
+  const allSelected =
+    currentPhotos.length > 0 &&
+    selectedCount ===
+      currentPhotos.length;
+
+  selectAllButton.textContent =
+    allSelected
+      ? "Ninguna"
+      : "Todas";
+
+
+  favoriteButton.disabled =
+    selectedCount === 0;
+
+  deleteButton.disabled =
+    selectedCount === 0;
+
+
+  const selectedPhotos =
+    currentPhotos.filter(
+      photo =>
+        selectedPhotoIds.has(
+          Number(photo.id)
+        )
+    );
+
+  const allFavorites =
+    selectedPhotos.length > 0 &&
+    selectedPhotos.every(
+      photo =>
+        Number(photo.favorite) === 1
+    );
+
+  favoriteButton.textContent =
+    allFavorites
+      ? "♡ Quitar favorito"
+      : "♥ Favoritas";
+
+
+  const items =
+    document
+      .getElementById(
+        "photoGrid"
+      )
+      .querySelectorAll(
+        ".photo-item"
+      );
+
+  items.forEach(
+    item => {
+
+      const photoId =
+        Number(
+          item.dataset.photoId
+        );
+
+      item.classList.toggle(
+        "selection-enabled",
+        photoSelectionMode
+      );
+
+      item.classList.toggle(
+        "selected",
+        photoSelectionMode &&
+        selectedPhotoIds.has(
+          photoId
+        )
+      );
+
+    }
+  );
+}
+
+
+function enterPhotoSelectionMode() {
+
+  if (!currentPhotos.length) {
+    return;
+  }
+
+  stopSlideshow();
+  closePhotoViewer();
+
+  photoSelectionMode = true;
+  selectedPhotoIds.clear();
+
+  updatePhotoSelectionUI();
+}
+
+
+function exitPhotoSelectionMode() {
+
+  photoSelectionMode = false;
+  selectedPhotoIds.clear();
+
+  updatePhotoSelectionUI();
+}
+
+
+function togglePhotoSelection(
+  photoId
+) {
+
+  const id =
+    Number(photoId);
+
+  if (selectedPhotoIds.has(id)) {
+    selectedPhotoIds.delete(id);
+  } else {
+    selectedPhotoIds.add(id);
+  }
+
+  updatePhotoSelectionUI();
+}
+
+
+document
+  .getElementById(
+    "selectPhotosButton"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      if (photoSelectionMode) {
+        exitPhotoSelectionMode();
+      } else {
+        enterPhotoSelectionMode();
+      }
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "cancelPhotoSelection"
+  )
+  .addEventListener(
+    "click",
+    exitPhotoSelectionMode
+  );
+
+
+document
+  .getElementById(
+    "selectAllPhotos"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      const allSelected =
+        currentPhotos.length > 0 &&
+        selectedPhotoIds.size ===
+          currentPhotos.length;
+
+      selectedPhotoIds.clear();
+
+      if (!allSelected) {
+
+        for (
+          const photo
+          of currentPhotos
+        ) {
+
+          selectedPhotoIds.add(
+            Number(photo.id)
+          );
+
+        }
+
+      }
+
+      updatePhotoSelectionUI();
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "favoriteSelectedPhotos"
+  )
+  .addEventListener(
+    "click",
+    async () => {
+
+      const selectedPhotos =
+        currentPhotos.filter(
+          photo =>
+            selectedPhotoIds.has(
+              Number(photo.id)
+            )
+        );
+
+      if (!selectedPhotos.length) {
+        return;
+      }
+
+
+      const allFavorites =
+        selectedPhotos.every(
+          photo =>
+            Number(photo.favorite) === 1
+        );
+
+      const newFavorite =
+        !allFavorites;
+
+      const button =
+        document.getElementById(
+          "favoriteSelectedPhotos"
+        );
+
+      button.disabled = true;
+      button.textContent =
+        "Guardando...";
+
+
+      try {
+
+        for (
+          const photo
+          of selectedPhotos
+        ) {
+
+          await api(
+            `/photos/${photo.id}`,
+            {
+              method: "PUT",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:
+                JSON.stringify({
+                  favorite:
+                    newFavorite
+                })
+            }
+          );
+
+        }
+
+
+        const albumId =
+          currentAlbumId;
+
+        photoSelectionMode =
+          false;
+
+        selectedPhotoIds.clear();
+
+
+        const data =
+          await api(
+            `/albums/${albumId}`
+          );
+
+        renderAlbumView(data);
+
+        await loadAlbums();
+
+
+      } catch (error) {
+
+        alert(error.message);
+
+      } finally {
+
+        button.disabled = false;
+
+        updatePhotoSelectionUI();
+
+      }
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "deleteSelectedPhotos"
+  )
+  .addEventListener(
+    "click",
+    async () => {
+
+      const selectedPhotos =
+        currentPhotos.filter(
+          photo =>
+            selectedPhotoIds.has(
+              Number(photo.id)
+            )
+        );
+
+      if (!selectedPhotos.length) {
+        return;
+      }
+
+
+      const total =
+        selectedPhotos.length;
+
+      const confirmed =
+        confirm(
+          `¿Eliminar ${total} fotografía${
+            total === 1
+              ? ""
+              : "s"
+          }?\n\nEsta acción no se puede deshacer.`
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+
+      const button =
+        document.getElementById(
+          "deleteSelectedPhotos"
+        );
+
+      button.disabled = true;
+
+      let deleted = 0;
+      let deletionError = null;
+
+
+      for (
+        const photo
+        of selectedPhotos
+      ) {
+
+        button.textContent =
+          `Eliminando ${deleted + 1}/${total}`;
+
+        try {
+
+          await api(
+            `/photos/${photo.id}`,
+            {
+              method: "DELETE"
+            }
+          );
+
+          deleted += 1;
+
+        } catch (error) {
+
+          deletionError =
+            error;
+
+          break;
+
+        }
+
+      }
+
+
+      try {
+
+        const albumId =
+          currentAlbumId;
+
+        photoSelectionMode =
+          false;
+
+        selectedPhotoIds.clear();
+
+
+        const data =
+          await api(
+            `/albums/${albumId}`
+          );
+
+        renderAlbumView(data);
+
+        await loadAlbums();
+
+
+        if (deletionError) {
+
+          alert(
+            `Se eliminaron ${deleted} de ${total} fotografías.\n\n${deletionError.message}`
+          );
+
+        }
+
+      } catch (error) {
+
+        alert(error.message);
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent =
+          "Eliminar";
+
+        updatePhotoSelectionUI();
+
+      }
+
+    }
+  );
+
+
 document
   .getElementById(
     "uploadPhotosButton"
