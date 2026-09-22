@@ -1047,6 +1047,8 @@ document
 
 function closeAlbumView() {
 
+  stopSlideshow();
+
   document
     .getElementById("albumView")
     .style.display = "none";
@@ -1184,6 +1186,61 @@ const viewerCounter =
 const favoritePhotoButton =
   document.getElementById("favoritePhoto");
 
+const slideshowToggleButton =
+  document.getElementById(
+    "slideshowToggle"
+  );
+
+const settingsMenuButton =
+  document.getElementById(
+    "settingsMenuButton"
+  );
+
+const settingsOverlay =
+  document.getElementById(
+    "settingsOverlay"
+  );
+
+const slideshowSpeedInput =
+  document.getElementById(
+    "slideshowSpeed"
+  );
+
+const slideshowSpeedValue =
+  document.getElementById(
+    "slideshowSpeedValue"
+  );
+
+let slideshowTimer = null;
+let slideshowRunning = false;
+let slideshowDelaySeconds = 5;
+
+try {
+  const savedDelay =
+    Number(
+      localStorage.getItem(
+        "blackpinkSlideshowDelay"
+      )
+    );
+
+  if (
+    Number.isFinite(savedDelay) &&
+    savedDelay >= 2 &&
+    savedDelay <= 10
+  ) {
+    slideshowDelaySeconds =
+      savedDelay;
+  }
+} catch {
+  // La galería funciona aunque el navegador bloquee localStorage.
+}
+
+slideshowSpeedInput.value =
+  String(slideshowDelaySeconds);
+
+slideshowSpeedValue.textContent =
+  `${slideshowDelaySeconds} s`;
+
 
 function openPhotoViewer(
   index,
@@ -1217,29 +1274,55 @@ function updatePhotoViewer() {
 
   const photo =
     currentPhotos[currentPhotoIndex];
-    
-    const coverButton =
-  document.getElementById("setCoverPhoto");
-
-if (
-  currentAlbum &&
-  currentAlbum.cover_key === photo.r2_key
-) {
-  coverButton.textContent = "✓ Es portada";
-  coverButton.disabled = true;
-} else {
-  coverButton.textContent = "♡ Portada";
-  coverButton.disabled = false;
-}
 
   if (!photo) {
     return;
   }
 
+  const coverButton =
+    document.getElementById(
+      "setCoverPhoto"
+    );
+
+  if (
+    currentAlbum &&
+    currentAlbum.cover_key ===
+      photo.r2_key
+  ) {
+
+    coverButton.textContent =
+      "✓ Es portada";
+
+    coverButton.disabled = true;
+
+  } else {
+
+    coverButton.textContent =
+      "♡ Portada";
+
+    coverButton.disabled = false;
+
+  }
+
+
+  viewerImage.classList.remove(
+    "slideshow-change"
+  );
+
   viewerImage.src =
     `${API}/images/${
-      encodeURIComponent(photo.r2_key)
+      encodeURIComponent(
+        photo.r2_key
+      )
     }`;
+
+  // Reinicia una animación sutil al cambiar de fotografía.
+  void viewerImage.offsetWidth;
+
+  viewerImage.classList.add(
+    "slideshow-change"
+  );
+
 
   viewerCounter.textContent =
     `${currentPhotoIndex + 1} / ${currentPhotos.length}`;
@@ -1248,10 +1331,16 @@ if (
     Number(photo.favorite) === 1
       ? "♥ Favorito"
       : "♡ Favorito";
+
+
+  slideshowToggleButton.disabled =
+    currentPhotos.length < 2;
 }
 
 
 function closePhotoViewer() {
+
+  stopSlideshow();
 
   photoViewer.classList.remove("show");
 
@@ -1275,6 +1364,7 @@ function showPreviousPhoto() {
     ) % currentPhotos.length;
 
   updatePhotoViewer();
+  syncPhotoHistoryState();
 }
 
 
@@ -1290,6 +1380,122 @@ function showNextPhoto() {
     ) % currentPhotos.length;
 
   updatePhotoViewer();
+  syncPhotoHistoryState();
+}
+
+
+function syncPhotoHistoryState() {
+
+  if (
+    history.state?.view !==
+      "photo" ||
+    !currentAlbumId
+  ) {
+    return;
+  }
+
+  history.replaceState(
+    {
+      view: "photo",
+      albumId: currentAlbumId,
+      photoIndex:
+        currentPhotoIndex
+    },
+    "",
+    `#album-${currentAlbumId}-photo-${currentPhotoIndex + 1}`
+  );
+}
+
+
+function scheduleSlideshow() {
+
+  clearTimeout(
+    slideshowTimer
+  );
+
+  if (
+    !slideshowRunning ||
+    currentPhotos.length < 2
+  ) {
+    return;
+  }
+
+  slideshowTimer =
+    setTimeout(
+      () => {
+
+        showNextPhoto();
+
+        scheduleSlideshow();
+
+      },
+      slideshowDelaySeconds *
+        1000
+    );
+}
+
+
+function startSlideshow() {
+
+  if (currentPhotos.length < 2) {
+    return;
+  }
+
+  slideshowRunning = true;
+
+  slideshowToggleButton
+    .classList.add(
+      "is-playing"
+    );
+
+  slideshowToggleButton
+    .setAttribute(
+      "aria-label",
+      "Pausar presentación automática"
+    );
+
+  slideshowToggleButton.textContent =
+    "⏸️";
+
+  scheduleSlideshow();
+}
+
+
+function stopSlideshow() {
+
+  slideshowRunning = false;
+
+  clearTimeout(
+    slideshowTimer
+  );
+
+  slideshowTimer = null;
+
+  if (slideshowToggleButton) {
+
+    slideshowToggleButton
+      .classList.remove(
+        "is-playing"
+      );
+
+    slideshowToggleButton
+      .setAttribute(
+        "aria-label",
+        "Iniciar presentación automática"
+      );
+
+    slideshowToggleButton.textContent =
+      "▶️";
+
+  }
+}
+
+
+function restartSlideshowCountdown() {
+
+  if (slideshowRunning) {
+    scheduleSlideshow();
+  }
 }
 
 
@@ -1315,7 +1521,10 @@ document
   .getElementById("previousPhoto")
   .addEventListener(
     "click",
-    showPreviousPhoto
+    () => {
+      showPreviousPhoto();
+      restartSlideshowCountdown();
+    }
   );
 
 
@@ -1323,8 +1532,133 @@ document
   .getElementById("nextPhoto")
   .addEventListener(
     "click",
-    showNextPhoto
+    () => {
+      showNextPhoto();
+      restartSlideshowCountdown();
+    }
   );
+
+
+slideshowToggleButton
+  .addEventListener(
+    "click",
+    () => {
+
+      if (slideshowRunning) {
+        stopSlideshow();
+      } else {
+        startSlideshow();
+      }
+
+    }
+  );
+
+
+/* =========================================
+   MENÚ DE AJUSTES
+========================================= */
+
+function openSettings() {
+
+  settingsOverlay.hidden = false;
+
+  settingsMenuButton.setAttribute(
+    "aria-expanded",
+    "true"
+  );
+
+  document.body.classList.add(
+    "settings-open"
+  );
+}
+
+
+function closeSettings() {
+
+  settingsOverlay.hidden = true;
+
+  settingsMenuButton.setAttribute(
+    "aria-expanded",
+    "false"
+  );
+
+  document.body.classList.remove(
+    "settings-open"
+  );
+}
+
+
+settingsMenuButton.addEventListener(
+  "click",
+  openSettings
+);
+
+
+document
+  .getElementById("closeSettings")
+  .addEventListener(
+    "click",
+    closeSettings
+  );
+
+
+document
+  .getElementById("settingsBackdrop")
+  .addEventListener(
+    "click",
+    closeSettings
+  );
+
+
+slideshowSpeedInput.addEventListener(
+  "input",
+  () => {
+
+    const value =
+      Math.min(
+        10,
+        Math.max(
+          2,
+          Number(
+            slideshowSpeedInput.value
+          ) || 5
+        )
+      );
+
+    slideshowDelaySeconds =
+      value;
+
+    slideshowSpeedValue.textContent =
+      `${value} s`;
+
+    try {
+      localStorage.setItem(
+        "blackpinkSlideshowDelay",
+        String(value)
+      );
+    } catch {
+      // El ajuste sigue funcionando durante la sesión.
+    }
+
+    restartSlideshowCountdown();
+
+  }
+);
+
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if (
+      event.key === "Escape" &&
+      !settingsOverlay.hidden
+    ) {
+      closeSettings();
+    }
+
+  }
+);
 
 
 /* PORTADA DEL ÁLBUM */
@@ -1490,6 +1824,7 @@ document
 
         if (!currentPhotos.length) {
 
+          stopSlideshow();
           closePhotoViewer();
 
           await openAlbum(
@@ -1508,6 +1843,12 @@ document
         ) {
           currentPhotoIndex =
             currentPhotos.length - 1;
+        }
+
+        if (
+          currentPhotos.length < 2
+        ) {
+          stopSlideshow();
         }
 
         updatePhotoViewer();
