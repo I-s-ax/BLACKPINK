@@ -668,16 +668,20 @@ function updateFavoritesModeUI() {
       "favoritesView"
     );
 
+  // "action" es la clase base del botón y debe conservarse
+  // siempre. Solo cambiamos su estado visual.
+  button.classList.add("action");
+
   if (favoritesOnly) {
 
     button.textContent = "← Galería";
 
-    button.classList.add(
-      "action"
-    );
-
     button.classList.remove(
       "light"
+    );
+
+    button.classList.add(
+      "is-active"
     );
 
     gallery.style.display = "none";
@@ -693,14 +697,14 @@ function updateFavoritesModeUI() {
   } else {
 
     button.textContent =
-      "♡ Favoritos";
+      "♥ Favoritos";
 
     button.classList.add(
       "light"
     );
 
     button.classList.remove(
-      "action"
+      "is-active"
     );
 
     gallery.style.display = "";
