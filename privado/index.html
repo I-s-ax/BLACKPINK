@@ -394,12 +394,22 @@
           </h3>
         </div>
 
-        <span
-          id="albumPhotoCount"
-          class="album-photo-count"
-        >
-          0
-        </span>
+        <div class="album-section-tools">
+          <button
+            id="selectPhotosButton"
+            class="album-select-button"
+            type="button"
+          >
+            Seleccionar
+          </button>
+
+          <span
+            id="albumPhotoCount"
+            class="album-photo-count"
+          >
+            0
+          </span>
+        </div>
       </div>
 
       <div
@@ -419,6 +429,55 @@
   >
     +
   </button>
+
+  <div
+    id="photoSelectionBar"
+    class="photo-selection-bar"
+    hidden
+  >
+    <div class="photo-selection-summary">
+      <span
+        id="photoSelectionCount"
+        class="photo-selection-count"
+      >
+        0 seleccionadas
+      </span>
+
+      <button
+        id="selectAllPhotos"
+        class="photo-selection-link"
+        type="button"
+      >
+        Todas
+      </button>
+    </div>
+
+    <div class="photo-selection-actions">
+      <button
+        id="favoriteSelectedPhotos"
+        class="photo-selection-action"
+        type="button"
+      >
+        ♥ Favoritas
+      </button>
+
+      <button
+        id="deleteSelectedPhotos"
+        class="photo-selection-action danger"
+        type="button"
+      >
+        Eliminar
+      </button>
+
+      <button
+        id="cancelPhotoSelection"
+        class="photo-selection-action secondary"
+        type="button"
+      >
+        Cancelar
+      </button>
+    </div>
+  </div>
 </div>
 
 
