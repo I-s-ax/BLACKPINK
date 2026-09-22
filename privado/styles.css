@@ -1707,3 +1707,538 @@ main {
     border-radius: 999px;
   }
 }
+
+
+/* =========================================
+   DISEÑO ROSA TIPO APP — REFERENCIA MÓVIL
+========================================= */
+
+:root {
+  --bp-pink: #f43884;
+  --bp-pink-2: #ff6fa7;
+  --bp-pale: #ffdbe9;
+  --bp-card: rgba(255,255,255,.78);
+  --bp-ink: #111015;
+}
+
+body {
+  color: var(--bp-ink);
+  background:
+    radial-gradient(
+      circle at 10% 16%,
+      rgba(255,255,255,.34) 0 46px,
+      transparent 47px
+    ),
+    radial-gradient(
+      circle at 92% 28%,
+      rgba(255,255,255,.22) 0 70px,
+      transparent 71px
+    ),
+    linear-gradient(
+      180deg,
+      #ffd5e5 0%,
+      #ffc3dc 45%,
+      #ffd7e7 100%
+    );
+  background-attachment: fixed;
+}
+
+.site-header,
+header.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  height: 72px;
+  padding: 0 18px;
+  background:
+    linear-gradient(
+      180deg,
+      #121116,
+      #0a090d
+    );
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  box-shadow: 0 8px 22px rgba(22,8,14,.12);
+}
+
+.site-header .logo {
+  color: #ffb3d0;
+  font-size: 21px;
+  font-weight: 950;
+  letter-spacing: 4px;
+  text-shadow: 0 1px 0 rgba(255,255,255,.15);
+}
+
+.site-header .menu {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #2b2830;
+  color: white;
+  font-size: 24px;
+}
+
+main {
+  width: min(760px, 100%);
+  padding: 0 14px 80px;
+}
+
+.reference-hero {
+  position: relative;
+  min-height: 150px;
+  padding: 24px 6px 16px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.reference-hero::before {
+  content: "♡";
+  position: absolute;
+  right: 32%;
+  top: 18px;
+  color: rgba(244,56,132,.11);
+  font-size: 88px;
+  transform: rotate(-9deg);
+  pointer-events: none;
+}
+
+.reference-hero-copy {
+  position: relative;
+  z-index: 2;
+}
+
+.reference-eyebrow {
+  display: block;
+  margin-bottom: 2px;
+  color: #121015;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 5px;
+}
+
+.reference-hero h1 {
+  margin: 0;
+  color: #101015;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(56px, 15vw, 92px);
+  font-weight: 500;
+  line-height: .82;
+  letter-spacing: -3px;
+}
+
+.reference-tagline {
+  margin: 12px 0 0;
+  color: #8c8290;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 6px;
+  white-space: nowrap;
+}
+
+.reference-signature {
+  position: relative;
+  z-index: 2;
+  align-self: center;
+  margin-top: 8px;
+  color: rgba(138,102,125,.72);
+  font-family: "Brush Script MT", "Segoe Script", cursive;
+  font-size: 25px;
+  line-height: .86;
+  text-align: center;
+  transform: rotate(-8deg);
+}
+
+.reference-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 4px 0 14px;
+}
+
+.reference-search > span {
+  position: absolute;
+  left: 18px;
+  z-index: 2;
+  color: #19161b;
+  font-size: 28px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.reference-search .search {
+  min-height: 62px;
+  padding: 0 20px 0 55px;
+  border: 1px solid rgba(255,255,255,.65);
+  border-radius: 22px;
+  background: rgba(255,255,255,.68);
+  color: #242127;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.8),
+    0 10px 25px rgba(135,49,86,.05);
+  font-size: 15px;
+}
+
+.reference-search .search::placeholder {
+  color: #918791;
+  opacity: 1;
+}
+
+.reference-search .search:focus {
+  border-color: rgba(244,56,132,.4);
+  background: rgba(255,255,255,.84);
+  box-shadow:
+    0 0 0 3px rgba(244,56,132,.10),
+    0 10px 25px rgba(135,49,86,.07);
+}
+
+.reference-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 0;
+  overflow: visible;
+}
+
+.reference-actions .action {
+  min-height: 58px;
+  padding: 0 14px;
+  border: 1px solid rgba(255,255,255,.72);
+  border-radius: 22px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.75),
+    0 10px 20px rgba(126,44,78,.06);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.reference-actions .action.light {
+  background: rgba(255,255,255,.52);
+  color: var(--bp-pink);
+}
+
+.reference-actions #createButton {
+  background:
+    linear-gradient(
+      135deg,
+      #ff5598,
+      #ef2878
+    );
+  color: white;
+  border-color: transparent;
+  box-shadow:
+    0 10px 24px rgba(220,37,109,.22);
+}
+
+#favoritesButton {
+  border-radius: 22px;
+}
+
+.categories {
+  margin: 0 -14px;
+  padding: 4px 14px 18px;
+  gap: 9px;
+}
+
+.category-item {
+  gap: 3px;
+}
+
+.category {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid rgba(255,255,255,.72);
+  border-radius: 999px;
+  background: rgba(255,255,255,.56);
+  color: #1f1b20;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
+}
+
+.category.active {
+  background:
+    linear-gradient(
+      135deg,
+      #ff5b9a,
+      #ee347b
+    );
+  color: white;
+  box-shadow: 0 8px 18px rgba(225,43,111,.20);
+}
+
+.category-menu-btn {
+  width: 30px;
+  height: 30px;
+  background: rgba(255,255,255,.5);
+  font-size: 17px;
+}
+
+.gallery-section-heading {
+  position: relative;
+  margin: 0 0 14px;
+  min-height: 58px;
+  align-items: flex-end;
+}
+
+.gallery-section-heading::after {
+  content: "BLACKPINK ♡";
+  position: absolute;
+  right: 4px;
+  bottom: 7px;
+  color: rgba(149,99,127,.64);
+  font-family: "Brush Script MT", "Segoe Script", cursive;
+  font-size: 19px;
+  font-weight: 500;
+  transform: rotate(-6deg);
+}
+
+.gallery-section-kicker {
+  color: #8c7483;
+  font-size: 10px;
+  letter-spacing: 5px;
+  text-transform: none;
+}
+
+.gallery-section-heading h2 {
+  margin: 2px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 39px;
+  font-weight: 500;
+  line-height: .88;
+}
+
+.gallery {
+  grid-template-columns:
+    repeat(2, minmax(0,1fr));
+  gap: 12px;
+}
+
+.album {
+  overflow: hidden;
+  border: 0;
+  border-radius: 18px;
+  background: rgba(255,255,255,.76);
+  box-shadow:
+    0 8px 22px rgba(126,52,84,.09);
+}
+
+.album .cover {
+  aspect-ratio: 1.48 / 1;
+  border-radius: 0;
+  background:
+    linear-gradient(
+      135deg,
+      #171218,
+      #633247
+    );
+}
+
+.album .cover img {
+  object-fit: cover;
+}
+
+.album .cover::after {
+  height: 28%;
+  background:
+    linear-gradient(
+      transparent,
+      rgba(0,0,0,.12)
+    );
+}
+
+.album-info {
+  padding: 8px 10px 10px;
+  background: rgba(255,255,255,.70);
+}
+
+.album-name {
+  margin: 0 0 2px;
+  color: #171318;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.08;
+}
+
+.album-count {
+  margin: 0;
+  color: #6e6670;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 1;
+}
+
+.album-category-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin: 7px 0 0;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #ffd5e6;
+  color: #ef3c82;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .3px;
+  text-transform: uppercase;
+}
+
+.album-favorite-badge {
+  top: 8px;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255,255,255,.55);
+  background: rgba(24,20,26,.80);
+  color: #ff5b99;
+  box-shadow: 0 4px 10px rgba(0,0,0,.18);
+  font-size: 18px;
+}
+
+.empty {
+  border: 1px solid rgba(255,255,255,.62);
+  background: rgba(255,255,255,.48);
+  color: #6e6370;
+}
+
+footer {
+  background: #0b0a0d;
+  color: #8d8790;
+  letter-spacing: 2px;
+}
+
+/* Favoritos con la misma estética clara */
+
+.favorites-view {
+  margin-top: 6px;
+}
+
+.favorites-hero {
+  border: 1px solid rgba(255,255,255,.62);
+  background:
+    radial-gradient(
+      circle at 86% 18%,
+      rgba(244,56,132,.14),
+      transparent 28%
+    ),
+    rgba(255,255,255,.52);
+  color: #171318;
+  box-shadow: 0 10px 26px rgba(126,52,84,.08);
+}
+
+.favorites-kicker {
+  color: #ef3c82;
+}
+
+.favorites-hero h2 {
+  color: #171318;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 500;
+}
+
+.favorites-hero p {
+  color: #746b75;
+}
+
+.favorite-section {
+  border: 1px solid rgba(255,255,255,.55);
+  background: rgba(255,255,255,.36);
+}
+
+.favorite-count {
+  background: #ef3c82;
+}
+
+/* Mobile tuning */
+
+@media (max-width: 560px) {
+  .site-header,
+  header.site-header {
+    height: 66px;
+    padding: 0 14px;
+  }
+
+  .site-header .logo {
+    font-size: 19px;
+    letter-spacing: 3px;
+  }
+
+  .site-header .menu {
+    width: 42px;
+    height: 42px;
+  }
+
+  main {
+    padding-inline: 14px;
+  }
+
+  .reference-hero {
+    min-height: 144px;
+    padding-top: 22px;
+  }
+
+  .reference-hero h1 {
+    font-size: clamp(50px, 16vw, 72px);
+  }
+
+  .reference-tagline {
+    max-width: 250px;
+    white-space: normal;
+    line-height: 1.6;
+    letter-spacing: 4px;
+  }
+
+  .reference-signature {
+    right: 2px;
+    font-size: 20px;
+  }
+
+  .reference-search .search {
+    min-height: 58px;
+  }
+
+  .reference-actions .action {
+    min-height: 58px;
+    padding-inline: 10px;
+    font-size: 14px;
+  }
+
+  .gallery {
+    grid-template-columns:
+      repeat(2, minmax(0,1fr));
+    gap: 10px;
+  }
+
+  .album {
+    border-radius: 16px;
+  }
+
+  .album-name {
+    font-size: 14px;
+  }
+
+  .album-category-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .gallery-section-heading::after {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 370px) {
+  .reference-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .reference-signature {
+    display: none;
+  }
+}
