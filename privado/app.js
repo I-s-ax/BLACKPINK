@@ -1214,6 +1214,7 @@ const slideshowSpeedValue =
 let slideshowTimer = null;
 let slideshowRunning = false;
 let slideshowDelaySeconds = 5;
+let screenWakeLock = null;
 
 try {
   const savedDelay =
@@ -1407,6 +1408,65 @@ function syncPhotoHistoryState() {
 }
 
 
+async function requestScreenWakeLock() {
+
+  if (
+    !("wakeLock" in navigator) ||
+    document.visibilityState !== "visible"
+  ) {
+    return;
+  }
+
+  try {
+
+    if (!screenWakeLock) {
+
+      screenWakeLock =
+        await navigator.wakeLock.request(
+          "screen"
+        );
+
+      screenWakeLock.addEventListener(
+        "release",
+        () => {
+          screenWakeLock = null;
+        }
+      );
+
+    }
+
+  } catch (error) {
+
+    console.warn(
+      "No se pudo mantener la pantalla activa:",
+      error
+    );
+
+    screenWakeLock = null;
+
+  }
+}
+
+
+async function releaseScreenWakeLock() {
+
+  if (!screenWakeLock) {
+    return;
+  }
+
+  const lock =
+    screenWakeLock;
+
+  screenWakeLock = null;
+
+  try {
+    await lock.release();
+  } catch {
+    // Puede haberse liberado automáticamente al ocultar la pestaña.
+  }
+}
+
+
 function scheduleSlideshow() {
 
   clearTimeout(
@@ -1435,13 +1495,15 @@ function scheduleSlideshow() {
 }
 
 
-function startSlideshow() {
+async function startSlideshow() {
 
   if (currentPhotos.length < 2) {
     return;
   }
 
   slideshowRunning = true;
+
+  await requestScreenWakeLock();
 
   slideshowToggleButton
     .classList.add(
@@ -1464,6 +1526,8 @@ function startSlideshow() {
 function stopSlideshow() {
 
   slideshowRunning = false;
+
+  void releaseScreenWakeLock();
 
   clearTimeout(
     slideshowTimer
@@ -1542,16 +1606,41 @@ document
 slideshowToggleButton
   .addEventListener(
     "click",
-    () => {
+    async () => {
 
       if (slideshowRunning) {
         stopSlideshow();
       } else {
-        startSlideshow();
+        await startSlideshow();
       }
 
     }
   );
+
+
+document.addEventListener(
+  "visibilitychange",
+  async () => {
+
+    if (
+      document.visibilityState ===
+        "visible" &&
+      slideshowRunning
+    ) {
+
+      await requestScreenWakeLock();
+
+    } else if (
+      document.visibilityState !==
+        "visible"
+    ) {
+
+      await releaseScreenWakeLock();
+
+    }
+
+  }
+);
 
 
 /* =========================================
