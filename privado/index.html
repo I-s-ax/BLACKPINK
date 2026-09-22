@@ -156,102 +156,162 @@
 
 <footer>
   BLACKPINK PRIVATE GALLERY
+</footer>
+
 <!-- VISTA DEL ÁLBUM -->
 
 <div
   id="albumView"
-  style="
-    display:none;
-    position:fixed;
-    inset:0;
-    background:#fff;
-    z-index:999;
-    overflow:auto;
-  "
+  class="album-view"
 >
+  <div class="album-view-shell">
 
-  <div style="padding:20px">
+    <div class="album-topbar">
+      <button
+        id="backToAlbums"
+        class="album-back-button"
+        type="button"
+      >
+        ← Volver
+      </button>
 
-    <button
-      id="backToAlbums"
-      class="action light"
-      type="button"
-    >
-      ← Volver
-    </button>
+      <span class="album-topbar-label">
+        PRIVATE ALBUM
+      </span>
+    </div>
 
-    <h2 id="albumTitle">
-      Álbum
-    </h2>
+    <section class="album-hero">
 
-    <p id="albumInfo"></p>
+      <div class="album-cover-large">
+        <img
+          id="albumCoverImage"
+          src=""
+          alt=""
+          hidden
+        >
 
-    <input
-      id="photoUploader"
-      type="file"
-      multiple
-      accept="image/*"
-      style="display:none"
-    >
+        <div
+          id="albumCoverPlaceholder"
+          class="album-cover-placeholder"
+        >
+          BP
+        </div>
+      </div>
 
-    <button
-      id="uploadPhotosButton"
-      class="action"
-      type="button"
-    >
-      + Subir fotos
-    </button>
-    
-    <div
-  style="
-    display:flex;
-    gap:8px;
-    margin-top:10px;
-    flex-wrap:wrap;
-  "
->
+      <div class="album-hero-content">
 
-  <button
-    id="favoriteAlbumButton"
-    class="action light"
-    type="button"
-  >
-    ♡ Álbum favorito
-  </button>
-  <button
-    id="editAlbumButton"
-    class="action light"
-    type="button"
-  >
-    Editar álbum
-  </button>
+        <span
+          id="albumCategoryBadge"
+          class="album-category-badge"
+        >
+          Álbum
+        </span>
 
-  <button
-    id="deleteAlbumButton"
-    class="action light"
-    type="button"
-  >
-    Eliminar álbum
-  </button>
-</div>
+        <h2 id="albumTitle">
+          Álbum
+        </h2>
 
-    <div
-      id="photoGrid"
-      style="
-        margin-top:20px;
-        display:grid;
-        gap:12px;
-        grid-template-columns:
-        repeat(auto-fill,minmax(140px,1fr));
-      "
-    ></div>
+        <p
+          id="albumDescription"
+          class="album-description"
+        ></p>
+
+        <div class="album-meta-row">
+          <span
+            id="albumInfo"
+            class="album-photo-total"
+          >
+            0 fotos
+          </span>
+        </div>
+
+        <input
+          id="photoUploader"
+          type="file"
+          multiple
+          accept="image/*"
+          hidden
+        >
+
+        <div class="album-actions">
+
+          <button
+            id="uploadPhotosButton"
+            class="album-action album-action-primary"
+            type="button"
+          >
+            + Subir fotos
+          </button>
+
+          <button
+            id="favoriteAlbumButton"
+            class="album-action"
+            type="button"
+          >
+            ♡ Álbum favorito
+          </button>
+
+          <button
+            id="editAlbumButton"
+            class="album-action"
+            type="button"
+          >
+            Editar
+          </button>
+
+          <button
+            id="deleteAlbumButton"
+            class="album-action album-action-danger"
+            type="button"
+          >
+            Eliminar
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <section class="album-photos-section">
+
+      <div class="album-section-heading">
+        <div>
+          <span class="album-section-kicker">
+            BLACKPINK
+          </span>
+
+          <h3>
+            FOTOGRAFÍAS
+          </h3>
+        </div>
+
+        <span
+          id="albumPhotoCount"
+          class="album-photo-count"
+        >
+          0
+        </span>
+      </div>
+
+      <div
+        id="photoGrid"
+        class="album-photo-grid"
+      ></div>
+
+    </section>
 
   </div>
 
+  <button
+    id="floatingUploadButton"
+    class="floating-upload-button"
+    type="button"
+    aria-label="Subir fotografías"
+  >
+    +
+  </button>
 </div>
-  
-  
-</footer>
 
 
 <!-- CREAR ÁLBUM -->
