@@ -708,3 +708,360 @@ footer {
     columns: 4;
   }
 }
+
+
+/* VISTA INTERNA DEL ÁLBUM */
+
+.album-view {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background:
+    radial-gradient(
+      circle at 90% 0%,
+      rgba(255,115,172,.28),
+      transparent 34%
+    ),
+    linear-gradient(
+      180deg,
+      #0a0a0a 0,
+      #151015 360px,
+      #f7eef2 360px,
+      #fff 100%
+    );
+  color: #111;
+}
+
+.album-view-shell {
+  width: min(1100px, 100%);
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 0 18px 90px;
+}
+
+.album-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(10,10,10,.88);
+  backdrop-filter: blur(16px);
+}
+
+.album-back-button {
+  border: 0;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.12);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.album-topbar-label {
+  color: #ff83b5;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2.6px;
+}
+
+.album-hero {
+  display: grid;
+  grid-template-columns: minmax(150px, 270px) 1fr;
+  gap: clamp(20px, 5vw, 48px);
+  align-items: end;
+  padding: 34px 0 44px;
+  color: white;
+}
+
+.album-cover-large {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 28px;
+  background:
+    linear-gradient(
+      135deg,
+      #151515,
+      #3c1828
+    );
+  box-shadow:
+    0 24px 60px rgba(0,0,0,.42),
+    0 0 0 1px rgba(255,255,255,.08);
+}
+
+.album-cover-large img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.album-cover-placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #ff7db2;
+  font-size: clamp(46px, 9vw, 88px);
+  font-weight: 900;
+  letter-spacing: -4px;
+}
+
+.album-category-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid rgba(255,126,179,.45);
+  border-radius: 999px;
+  background: rgba(255,115,172,.1);
+  color: #ff91bd;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.album-hero-content h2 {
+  max-width: 760px;
+  margin: 12px 0 8px;
+  color: white;
+  font-size: clamp(36px, 8vw, 72px);
+  line-height: .94;
+  letter-spacing: -2px;
+  overflow-wrap: anywhere;
+}
+
+.album-description {
+  max-width: 650px;
+  margin: 0;
+  color: rgba(255,255,255,.68);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.album-description.is-empty {
+  font-style: italic;
+  opacity: .65;
+}
+
+.album-meta-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.album-photo-total {
+  color: rgba(255,255,255,.75);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.album-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.album-action {
+  border: 1px solid rgba(255,255,255,.13);
+  padding: 11px 14px;
+  border-radius: 13px;
+  background: rgba(255,255,255,.1);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.album-action-primary {
+  border-color: transparent;
+  background: #ff73ac;
+  color: #111;
+}
+
+.album-action-danger {
+  color: #ffc4d9;
+}
+
+.album-action:disabled {
+  cursor: default;
+  opacity: .55;
+}
+
+.album-photos-section {
+  padding: 24px 0 36px;
+}
+
+.album-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.album-section-kicker {
+  display: block;
+  color: #bd557f;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2.4px;
+}
+
+.album-section-heading h3 {
+  margin: 3px 0 0;
+  font-size: clamp(26px, 7vw, 42px);
+  line-height: .95;
+}
+
+.album-photo-count {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #111;
+  color: white;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.album-photo-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fill, minmax(145px, 1fr));
+  gap: 12px;
+}
+
+.album-photo-grid .photo-item {
+  overflow: hidden;
+  border-radius: 17px;
+  background: #111;
+  box-shadow: 0 8px 24px rgba(0,0,0,.1);
+}
+
+.album-photo-grid .photo-item img {
+  border-radius: 0;
+  transition: transform .2s ease;
+}
+
+.album-photo-grid .photo-item:active img {
+  transform: scale(.98);
+}
+
+.album-empty {
+  grid-column: 1 / -1;
+  padding: 45px 20px;
+  border: 1px dashed rgba(17,17,17,.18);
+  border-radius: 20px;
+  text-align: center;
+  background: rgba(255,255,255,.62);
+  color: rgba(17,17,17,.58);
+}
+
+.album-empty strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #111;
+}
+
+.floating-upload-button {
+  position: fixed;
+  right: max(18px, calc((100vw - 1100px) / 2 + 20px));
+  bottom: 22px;
+  z-index: 12;
+  width: 58px;
+  height: 58px;
+  border: 0;
+  border-radius: 50%;
+  background: #ff73ac;
+  color: #111;
+  box-shadow: 0 14px 32px rgba(0,0,0,.28);
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+@media (max-width: 650px) {
+  .album-view {
+    background:
+      radial-gradient(
+        circle at 100% 0%,
+        rgba(255,115,172,.24),
+        transparent 30%
+      ),
+      linear-gradient(
+        180deg,
+        #0a0a0a 0,
+        #151015 520px,
+        #f8eff3 520px,
+        #fff 100%
+      );
+  }
+
+  .album-view-shell {
+    padding-inline: 14px;
+  }
+
+  .album-hero {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding-top: 18px;
+  }
+
+  .album-cover-large {
+    width: min(72vw, 310px);
+    margin: 0 auto;
+    border-radius: 24px;
+  }
+
+  .album-hero-content {
+    text-align: center;
+  }
+
+  .album-category-badge {
+    justify-content: center;
+  }
+
+  .album-description {
+    margin-inline: auto;
+  }
+
+  .album-meta-row,
+  .album-actions {
+    justify-content: center;
+  }
+
+  .album-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .album-action {
+    width: 100%;
+  }
+
+  .album-photo-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .floating-upload-button {
+    right: 17px;
+    bottom: 17px;
+  }
+}
