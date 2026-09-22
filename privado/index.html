@@ -91,6 +91,13 @@
 
   <div id="message" class="message"></div>
 
+  <div class="gallery-section-heading">
+    <div>
+      <span class="gallery-section-kicker">COLECCIÓN</span>
+      <h2>Álbumes</h2>
+    </div>
+  </div>
+
   <section class="gallery" id="gallery">
     <div class="loading">
       Cargando álbumes...
@@ -448,7 +455,7 @@
 <div class="photo-viewer" id="photoViewer">
 
   <button
-    class="viewer-close"
+    class="viewer-close viewer-control"
     id="closeViewer"
     type="button"
     aria-label="Cerrar"
@@ -457,7 +464,7 @@
   </button>
 
   <button
-    class="viewer-nav viewer-prev"
+    class="viewer-nav viewer-prev viewer-control"
     id="previousPhoto"
     type="button"
     aria-label="Anterior"
@@ -481,6 +488,7 @@
       
         <button
   id="fullscreenPhoto"
+  class="viewer-action-button"
   type="button"
   aria-label="Pantalla completa"
 >
@@ -489,6 +497,7 @@
 
        <button
   id="setCoverPhoto"
+  class="viewer-action-button"
   type="button"
 >
   ♡ Portada
@@ -500,6 +509,7 @@
 
         <button
           id="favoritePhoto"
+          class="viewer-action-button"
           type="button"
         >
           ♡ Favorito
@@ -507,7 +517,7 @@
 
         <button
           id="deletePhoto"
-          class="danger"
+          class="viewer-action-button danger"
           type="button"
         >
           Eliminar
@@ -520,7 +530,7 @@
   </div>
 
   <button
-    class="viewer-nav viewer-next"
+    class="viewer-nav viewer-next viewer-control"
     id="nextPhoto"
     type="button"
     aria-label="Siguiente"
