@@ -163,6 +163,11 @@ function renderAlbums(albums) {
     card.innerHTML = `
       ${cover}
 
+      ${Number(album.favorite) === 1
+        ? '<div class="album-favorite-badge">♥</div>'
+        : ''
+      }
+
       <div class="album-info">
 
         <p class="album-name"></p>
@@ -176,12 +181,19 @@ function renderAlbums(albums) {
           }
         </p>
 
+        <p class="album-category-label"></p>
+
       </div>
     `;
 
     card.querySelector(
       ".album-name"
     ).textContent = album.name;
+
+    card.querySelector(
+      ".album-category-label"
+    ).textContent =
+      album.category || "Sin categoría";
 
     card.addEventListener(
       "click",
@@ -681,7 +693,7 @@ function updateFavoritesModeUI() {
   } else {
 
     button.textContent =
-      "Favoritos";
+      "♡ Favoritos";
 
     button.classList.add(
       "light"
