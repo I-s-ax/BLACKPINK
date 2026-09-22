@@ -784,91 +784,226 @@ async function init() {
 
 
 function renderAlbumView(data) {
-  
-  currentAlbum = data.album;
-  
-  const favoriteAlbumButton =
-  document.getElementById(
-    "favoriteAlbumButton"
-  );
 
-favoriteAlbumButton.textContent =
-  Number(currentAlbum.favorite) === 1
-    ? "♥ Álbum favorito"
-    : "♡ Álbum favorito";
+  currentAlbum = data.album;
+  currentPhotos = data.photos || [];
+
+  const favoriteAlbumButton =
+    document.getElementById(
+      "favoriteAlbumButton"
+    );
+
+  favoriteAlbumButton.textContent =
+    Number(currentAlbum.favorite) === 1
+      ? "♥ Álbum favorito"
+      : "♡ Álbum favorito";
+
 
   const albumView =
     document.getElementById(
       "albumView"
     );
 
-  document
-    .getElementById("albumTitle")
-    .textContent =
-      data.album.name;
+  const albumTitle =
+    document.getElementById(
+      "albumTitle"
+    );
 
-  document
-    .getElementById("albumInfo")
-    .textContent =
-      `${data.photos.length} foto(s)`;
+  const albumCategoryBadge =
+    document.getElementById(
+      "albumCategoryBadge"
+    );
+
+  const albumDescription =
+    document.getElementById(
+      "albumDescription"
+    );
+
+  const albumInfo =
+    document.getElementById(
+      "albumInfo"
+    );
+
+  const albumPhotoCount =
+    document.getElementById(
+      "albumPhotoCount"
+    );
+
+  const albumCoverImage =
+    document.getElementById(
+      "albumCoverImage"
+    );
+
+  const albumCoverPlaceholder =
+    document.getElementById(
+      "albumCoverPlaceholder"
+    );
 
   const grid =
     document.getElementById(
       "photoGrid"
     );
 
-  grid.innerHTML = "";
 
-  currentPhotos = data.photos || [];
+  albumTitle.textContent =
+    currentAlbum.name || "Álbum";
 
-for (let i = 0; i < currentPhotos.length; i++) {
+  albumCategoryBadge.textContent =
+    currentAlbum.category ||
+    "Sin categoría";
 
-  const photo = currentPhotos[i];
+  const description =
+    String(
+      currentAlbum.description || ""
+    ).trim();
 
-  const item =
-    document.createElement("div");
+  albumDescription.textContent =
+    description ||
+    "Sin descripción";
 
-  item.className = "photo-item";
+  albumDescription.classList.toggle(
+    "is-empty",
+    !description
+  );
 
-  const image =
-    document.createElement("img");
 
-  image.src =
-    `${API}/images/${
-      encodeURIComponent(photo.r2_key)
+  const photoTotal =
+    currentPhotos.length;
+
+  albumInfo.textContent =
+    `${photoTotal} foto${
+      photoTotal === 1 ? "" : "s"
     }`;
 
-  image.loading = "lazy";
-  image.alt =
-    photo.title || photo.filename || "Fotografía";
-
-  item.appendChild(image);
+  albumPhotoCount.textContent =
+    String(photoTotal);
 
 
-  if (Number(photo.favorite) === 1) {
+  if (currentAlbum.cover_key) {
 
-    const heart =
-      document.createElement("div");
+    albumCoverImage.src =
+      `${API}/images/${
+        encodeURIComponent(
+          currentAlbum.cover_key
+        )
+      }`;
 
-    heart.className =
-      "photo-favorite-badge";
+    albumCoverImage.alt =
+      `Portada de ${currentAlbum.name}`;
 
-    heart.textContent = "♥";
+    albumCoverImage.hidden = false;
 
-    item.appendChild(heart);
+    albumCoverPlaceholder.hidden =
+      true;
+
+  } else {
+
+    albumCoverImage.removeAttribute(
+      "src"
+    );
+
+    albumCoverImage.hidden = true;
+
+    albumCoverPlaceholder.hidden =
+      false;
+
   }
 
 
-  item.addEventListener(
-    "click",
-    () => openPhotoViewer(i)
-  );
+  grid.innerHTML = "";
 
-  grid.appendChild(item);
-}
+
+  if (!currentPhotos.length) {
+
+    grid.innerHTML = `
+      <div class="album-empty">
+        <strong>
+          Este álbum todavía está vacío
+        </strong>
+        Sube tus primeras fotografías con el botón +.
+      </div>
+    `;
+
+  } else {
+
+    for (
+      let i = 0;
+      i < currentPhotos.length;
+      i++
+    ) {
+
+      const photo =
+        currentPhotos[i];
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+      item.className =
+        "photo-item";
+
+
+      const image =
+        document.createElement(
+          "img"
+        );
+
+      image.src =
+        `${API}/images/${
+          encodeURIComponent(
+            photo.r2_key
+          )
+        }`;
+
+      image.loading = "lazy";
+
+      image.alt =
+        photo.title ||
+        photo.filename ||
+        "Fotografía";
+
+      item.appendChild(image);
+
+
+      if (
+        Number(photo.favorite) === 1
+      ) {
+
+        const heart =
+          document.createElement(
+            "div"
+          );
+
+        heart.className =
+          "photo-favorite-badge";
+
+        heart.textContent = "♥";
+
+        item.appendChild(heart);
+
+      }
+
+
+      item.addEventListener(
+        "click",
+        () => openPhotoViewer(i)
+      );
+
+      grid.appendChild(item);
+
+    }
+
+  }
+
 
   albumView.style.display =
     "block";
+
+  albumView.scrollTo(
+    0,
+    0
+  );
 }
 
 
@@ -901,6 +1036,7 @@ function closeAlbumView() {
     .style.display = "none";
 
   currentAlbumId = null;
+  currentAlbum = null;
   currentPhotos = [];
 
   window.scrollTo(0, 0);
@@ -910,6 +1046,24 @@ function closeAlbumView() {
 document
   .getElementById(
     "uploadPhotosButton"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      document
+        .getElementById(
+          "photoUploader"
+        )
+        .click();
+
+    }
+  );
+
+
+document
+  .getElementById(
+    "floatingUploadButton"
   )
   .addEventListener(
     "click",
