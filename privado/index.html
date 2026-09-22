@@ -97,20 +97,60 @@
     </div>
   </section>
   <section
-  id="favoritePhotosSection"
-  style="display:none"
->
+    id="favoritesView"
+    class="favorites-view"
+    hidden
+  >
+    <div class="favorites-hero">
+      <span class="favorites-kicker">BLACKPINK PRIVATE COLLECTION</span>
+      <h2>FAVORITOS</h2>
+      <p>
+        Tus álbumes y fotografías favoritas, reunidos en un solo lugar.
+      </p>
+    </div>
 
-  <h2>
-    Fotos favoritas
-  </h2>
+    <section class="favorite-section">
+      <div class="favorite-section-header">
+        <div>
+          <span class="favorite-eyebrow">COLECCIÓN</span>
+          <h3>Álbumes favoritos</h3>
+        </div>
 
-  <div
-    class="gallery"
-    id="favoritePhotosGrid"
-  ></div>
+        <span
+          class="favorite-count"
+          id="favoriteAlbumsCount"
+        >
+          0
+        </span>
+      </div>
 
-</section>
+      <div
+        class="gallery favorite-albums-grid"
+        id="favoriteAlbumsGrid"
+      ></div>
+    </section>
+
+    <section class="favorite-section">
+      <div class="favorite-section-header">
+        <div>
+          <span class="favorite-eyebrow">FOTOGRAFÍAS</span>
+          <h3>Fotos favoritas</h3>
+        </div>
+
+        <span
+          class="favorite-count"
+          id="favoritePhotosCount"
+        >
+          0
+        </span>
+      </div>
+
+      <div
+        class="favorite-photos-grid"
+        id="favoritePhotosGrid"
+      ></div>
+    </section>
+  </section>
 
 </main>
 
