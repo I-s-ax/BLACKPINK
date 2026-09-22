@@ -11,60 +11,66 @@
 
 <body>
 
-<header>
+<header class="site-header">
   <div class="logo">BLACKPINK</div>
 
-  <button class="menu" type="button">
+  <button
+    class="menu"
+    type="button"
+    aria-label="Menú"
+  >
     ☰
   </button>
 </header>
 
 <main>
 
-  <p class="subtitle">BLACKPINK</p>
-  <h1>GALERÍA</h1>
+  <section class="reference-hero">
+    <div class="reference-hero-copy">
+      <span class="reference-eyebrow">BLACKPINK</span>
 
-  <input
-    id="search"
-    class="search"
-    type="search"
-    placeholder="Buscar álbum..."
-  >
+      <h1>GALERÍA</h1>
 
-  <div class="actions">
+      <p class="reference-tagline">
+        MOMENTOS QUE HACEN HISTORIA
+      </p>
+    </div>
+
+    <div
+      class="reference-signature"
+      aria-hidden="true"
+    >
+      Blink<br>Forever ♡
+    </div>
+  </section>
+
+  <div class="reference-search">
+    <span aria-hidden="true">⌕</span>
+
+    <input
+      id="search"
+      class="search"
+      type="search"
+      placeholder="Buscar álbum..."
+    >
+  </div>
+
+  <div class="actions reference-actions">
 
     <button
       class="action light"
       id="favoritesButton"
       type="button"
     >
-      Favoritos
+      ♥ Favoritos
     </button>
-    
 
     <button
       class="action"
       id="createButton"
       type="button"
     >
-      Crear Álbum
-    </button>
-
-    <button
-      class="action light"
-      type="button"
-    >
-      Eliminar Álbumes
-    </button>
-    
-    
-    
-
-    <button
-      class="action light"
-      type="button"
-    >
-      Editar Álbumes
+      ＋ Crear Álbum
     </button>
 
   </div>
