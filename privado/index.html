@@ -472,6 +472,65 @@
 
   </div>
 </div>
+
+
+<!-- ADMINISTRAR CATEGORÍA -->
+
+<div
+  class="modal"
+  id="manageCategoryModal"
+>
+  <div class="modal-box">
+
+    <h2>Editar categoría</h2>
+
+    <form id="manageCategoryForm">
+
+      <div class="field">
+        <label for="manageCategoryName">
+          Nombre
+        </label>
+
+        <input
+          id="manageCategoryName"
+          maxlength="50"
+          required
+          autocomplete="off"
+        >
+      </div>
+
+      <div class="modal-actions">
+
+        <button
+          class="btn cancel"
+          id="cancelManageCategory"
+          type="button"
+        >
+          Cancelar
+        </button>
+
+        <button
+          class="btn category-delete"
+          id="deleteCategory"
+          type="button"
+        >
+          Eliminar
+        </button>
+
+        <button
+          class="btn save"
+          id="saveCategoryChanges"
+          type="submit"
+        >
+          Guardar
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+</div>
 <script src="app.js" defer></script>
 
 </body>

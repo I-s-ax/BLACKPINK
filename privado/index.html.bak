@@ -360,13 +360,15 @@
   ⛶
 </button>
 
-
-        <button
+       <button
   id="setCoverPhoto"
   type="button"
 >
   ♡ Portada
 </button>
+
+
+        
       
 
         <button

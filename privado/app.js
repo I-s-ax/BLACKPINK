@@ -373,37 +373,77 @@ function renderCategories() {
 
   for (const category of categoryList) {
 
-    const button =
-      document.createElement("button");
+  const item =
+    document.createElement("div");
 
-    button.type = "button";
+  item.className =
+    "category-item";
 
-    button.className =
-      "category" +
-      (
-        currentCategory === category.name
-          ? " active"
-          : ""
-      );
 
-    button.textContent =
-      category.name;
+  const button =
+    document.createElement("button");
 
-    button.addEventListener(
-      "click",
-      () => {
+  button.type = "button";
 
-        currentCategory =
-          category.name;
-
-        renderCategories();
-        loadAlbums();
-
-      }
+  button.className =
+    "category" +
+    (
+      currentCategory === category.name
+        ? " active"
+        : ""
     );
 
-    container.appendChild(button);
-  }
+  button.textContent =
+    category.name;
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      currentCategory =
+        category.name;
+
+      renderCategories();
+      loadAlbums();
+
+    }
+  );
+
+
+  const menuButton =
+    document.createElement("button");
+
+  menuButton.type = "button";
+
+  menuButton.className =
+    "category-menu-btn";
+
+  menuButton.textContent = "⋮";
+
+  menuButton.setAttribute(
+    "aria-label",
+    `Editar ${category.name}`
+  );
+
+  menuButton.addEventListener(
+    "click",
+    event => {
+
+      event.stopPropagation();
+
+      openManageCategory(
+        category
+      );
+
+    }
+  );
+
+
+  item.appendChild(button);
+  item.appendChild(menuButton);
+
+  container.appendChild(item);
+}
 
 
   // NUEVA CATEGORÍA
@@ -1606,6 +1646,252 @@ document
 
     }
   );
+/* =========================================
+   ADMINISTRAR CATEGORÍAS
+========================================= */
 
+const manageCategoryModal =
+  document.getElementById(
+    "manageCategoryModal"
+  );
+
+const manageCategoryForm =
+  document.getElementById(
+    "manageCategoryForm"
+  );
+
+const manageCategoryName =
+  document.getElementById(
+    "manageCategoryName"
+  );
+
+let categoryBeingEdited = null;
+
+
+function openManageCategory(category) {
+
+  categoryBeingEdited =
+    category;
+
+  manageCategoryName.value =
+    category.name;
+
+  manageCategoryModal
+    .classList.add("show");
+
+  document.body.style.overflow =
+    "hidden";
+
+  setTimeout(() => {
+
+    manageCategoryName.focus();
+
+    manageCategoryName.select();
+
+  }, 100);
+}
+
+
+function closeManageCategory() {
+
+  manageCategoryModal
+    .classList.remove("show");
+
+  document.body.style.overflow = "";
+
+  categoryBeingEdited = null;
+
+  manageCategoryForm.reset();
+}
+
+
+document
+  .getElementById(
+    "cancelManageCategory"
+  )
+  .addEventListener(
+    "click",
+    closeManageCategory
+  );
+
+
+manageCategoryModal.addEventListener(
+  "click",
+  event => {
+
+    if (
+      event.target ===
+      manageCategoryModal
+    ) {
+
+      closeManageCategory();
+
+    }
+
+  }
+);
+
+
+/* RENOMBRAR */
+
+manageCategoryForm.addEventListener(
+  "submit",
+  async event => {
+
+    event.preventDefault();
+
+    if (!categoryBeingEdited) {
+      return;
+    }
+
+    const oldName =
+      categoryBeingEdited.name;
+
+    const newName =
+      manageCategoryName
+        .value
+        .trim();
+
+    if (!newName) {
+      return;
+    }
+
+    const button =
+      document.getElementById(
+        "saveCategoryChanges"
+      );
+
+    button.disabled = true;
+    button.textContent =
+      "Guardando...";
+
+    try {
+
+      await api(
+        `/categories/${categoryBeingEdited.id}`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            name: newName
+          })
+        }
+      );
+
+
+      if (
+        currentCategory === oldName
+      ) {
+
+        currentCategory =
+          newName;
+
+      }
+
+
+      closeManageCategory();
+
+      await loadCategories();
+      await loadAlbums();
+
+    } catch (error) {
+
+      alert(error.message);
+
+    } finally {
+
+      button.disabled = false;
+      button.textContent =
+        "Guardar";
+
+    }
+
+  }
+);
+
+
+/* ELIMINAR */
+
+document
+  .getElementById(
+    "deleteCategory"
+  )
+  .addEventListener(
+    "click",
+    async () => {
+
+      if (!categoryBeingEdited) {
+        return;
+      }
+
+      const category =
+        categoryBeingEdited;
+
+      const confirmed =
+        confirm(
+          `¿Eliminar la categoría "${category.name}"?\n\n` +
+          "Los álbumes no se eliminarán. " +
+          "Pasarán a Sin categoría."
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+
+      const button =
+        document.getElementById(
+          "deleteCategory"
+        );
+
+      button.disabled = true;
+      button.textContent =
+        "Eliminando...";
+
+      try {
+
+        await api(
+          `/categories/${category.id}`,
+          {
+            method: "DELETE"
+          }
+        );
+
+
+        if (
+          currentCategory ===
+          category.name
+        ) {
+
+          currentCategory =
+            "Todas";
+
+        }
+
+
+        closeManageCategory();
+
+        await loadCategories();
+        await loadAlbums();
+
+      } catch (error) {
+
+        alert(error.message);
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent =
+          "Eliminar";
+
+      }
+
+    }
+  );
 
 init();

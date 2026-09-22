@@ -373,37 +373,77 @@ function renderCategories() {
 
   for (const category of categoryList) {
 
-    const button =
-      document.createElement("button");
+  const item =
+    document.createElement("div");
 
-    button.type = "button";
+  item.className =
+    "category-item";
 
-    button.className =
-      "category" +
-      (
-        currentCategory === category.name
-          ? " active"
-          : ""
-      );
 
-    button.textContent =
-      category.name;
+  const button =
+    document.createElement("button");
 
-    button.addEventListener(
-      "click",
-      () => {
+  button.type = "button";
 
-        currentCategory =
-          category.name;
-
-        renderCategories();
-        loadAlbums();
-
-      }
+  button.className =
+    "category" +
+    (
+      currentCategory === category.name
+        ? " active"
+        : ""
     );
 
-    container.appendChild(button);
-  }
+  button.textContent =
+    category.name;
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      currentCategory =
+        category.name;
+
+      renderCategories();
+      loadAlbums();
+
+    }
+  );
+
+
+  const menuButton =
+    document.createElement("button");
+
+  menuButton.type = "button";
+
+  menuButton.className =
+    "category-menu-btn";
+
+  menuButton.textContent = "⋮";
+
+  menuButton.setAttribute(
+    "aria-label",
+    `Editar ${category.name}`
+  );
+
+  menuButton.addEventListener(
+    "click",
+    event => {
+
+      event.stopPropagation();
+
+      openManageCategory(
+        category
+      );
+
+    }
+  );
+
+
+  item.appendChild(button);
+  item.appendChild(menuButton);
+
+  container.appendChild(item);
+}
 
 
   // NUEVA CATEGORÍA
@@ -1007,7 +1047,17 @@ document
   .getElementById("closeViewer")
   .addEventListener(
     "click",
-    closePhotoViewer
+    () => {
+
+      if (
+        history.state?.view === "photo"
+      ) {
+        history.back();
+      } else {
+        closePhotoViewer();
+      }
+
+    }
   );
 
 
