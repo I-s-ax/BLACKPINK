@@ -1689,3 +1689,21 @@ main {
     bottom: 120px;
   }
 }
+
+
+/* BOTÓN FAVORITOS: mantener forma de cápsula */
+
+#favoritesButton {
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding-inline: 18px;
+}
+
+@media (max-width: 680px) {
+  #favoritesButton {
+    border-radius: 999px;
+  }
+}
