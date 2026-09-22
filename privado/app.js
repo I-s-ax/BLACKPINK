@@ -410,6 +410,17 @@ function renderCategories() {
   );
 
 
+  item.appendChild(button);
+
+
+/*
+ * "Sin categoría" es una categoría
+ * especial del sistema.
+ * No permitimos editarla ni borrarla.
+ */
+
+if (!category.system) {
+
   const menuButton =
     document.createElement("button");
 
@@ -438,11 +449,13 @@ function renderCategories() {
     }
   );
 
-
-  item.appendChild(button);
   item.appendChild(menuButton);
 
-  container.appendChild(item);
+}
+
+
+container.appendChild(item);
+
 }
 
 
