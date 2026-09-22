@@ -56,10 +56,18 @@ async function api(path, options = {}) {
 
 async function loadAlbums() {
 
+  message.textContent = "";
+  message.className = "message";
+
+  updateFavoritesModeUI();
+
+  if (favoritesOnly) {
+    await loadFavoritesView();
+    return;
+  }
+
   gallery.innerHTML =
     '<div class="loading">Cargando...</div>';
-
-  message.textContent = "";
 
   const params =
     new URLSearchParams();
@@ -78,19 +86,13 @@ async function loadAlbums() {
     );
   }
 
-  if (favoritesOnly) {
-    params.set("favorites", "1");
-  }
-
   try {
 
     const data = await api(
       "/albums?" + params.toString()
     );
 
-    renderAlbums(data.albums);
-    
-    await loadFavoritePhotos();
+    renderAlbums(data.albums || []);
 
   } catch (error) {
 
@@ -637,28 +639,81 @@ categoryForm.addEventListener(
 
 /* FAVORITOS */
 
+function updateFavoritesModeUI() {
+
+  const button =
+    document.getElementById(
+      "favoritesButton"
+    );
+
+  const categories =
+    document.getElementById(
+      "categories"
+    );
+
+  const favoritesView =
+    document.getElementById(
+      "favoritesView"
+    );
+
+  if (favoritesOnly) {
+
+    button.textContent = "← Galería";
+
+    button.classList.add(
+      "action"
+    );
+
+    button.classList.remove(
+      "light"
+    );
+
+    gallery.style.display = "none";
+
+    favoritesView.hidden = false;
+
+    searchInput.style.display =
+      "none";
+
+    categories.style.display =
+      "none";
+
+  } else {
+
+    button.textContent =
+      "Favoritos";
+
+    button.classList.add(
+      "light"
+    );
+
+    button.classList.remove(
+      "action"
+    );
+
+    gallery.style.display = "";
+
+    favoritesView.hidden = true;
+
+    searchInput.style.display = "";
+
+    categories.style.display = "";
+
+  }
+}
+
+
 document
   .getElementById("favoritesButton")
   .addEventListener(
     "click",
-    event => {
+    async () => {
 
       favoritesOnly =
         !favoritesOnly;
 
-      event.currentTarget
-        .classList.toggle(
-          "action",
-          favoritesOnly
-        );
+      await loadAlbums();
 
-      event.currentTarget
-        .classList.toggle(
-          "light",
-          !favoritesOnly
-        );
-
-      loadAlbums();
     }
   );
 
@@ -1208,6 +1263,10 @@ favoritePhotoButton.addEventListener(
 
       renderAlbumView(data);
 
+      if (favoritesOnly) {
+        await loadFavoritesView();
+      }
+
     } catch (error) {
 
       alert(error.message);
@@ -1264,7 +1323,8 @@ document
           closePhotoViewer();
 
           await openAlbum(
-            currentAlbumId
+            currentAlbumId,
+            false
           );
 
           await loadAlbums();
@@ -1986,49 +2046,166 @@ document
   
   
 /* =========================================
-   FOTOS FAVORITAS
+   VISTA DE FAVORITOS
 ========================================= */
 
-async function loadFavoritePhotos() {
+async function loadFavoritesView() {
 
-  const section =
+  const albumsGrid =
     document.getElementById(
-      "favoritePhotosSection"
+      "favoriteAlbumsGrid"
     );
 
-  const grid =
+  const photosGrid =
     document.getElementById(
       "favoritePhotosGrid"
     );
 
-  if (!favoritesOnly) {
+  albumsGrid.innerHTML =
+    '<div class="loading">Cargando álbumes favoritos...</div>';
 
-    section.style.display = "none";
-    grid.innerHTML = "";
-
-    return;
-  }
-
-  section.style.display = "block";
+  photosGrid.innerHTML =
+    '<div class="loading">Cargando fotos favoritas...</div>';
 
   try {
 
-    const data =
-      await api(
-        "/photos?favorites=1"
-      );
+    const [
+      albumsData,
+      photosData
+    ] = await Promise.all([
+      api("/albums?favorites=1"),
+      api("/photos?favorites=1")
+    ]);
+
+    renderFavoriteAlbums(
+      albumsData.albums || []
+    );
 
     renderFavoritePhotos(
-      data.photos || []
+      photosData.photos || []
     );
 
   } catch (error) {
 
+    albumsGrid.innerHTML = "";
+    photosGrid.innerHTML = "";
+
+    message.className =
+      "message error";
+
+    message.textContent =
+      error.message;
+
+  }
+}
+
+
+function renderFavoriteAlbums(albums) {
+
+  const grid =
+    document.getElementById(
+      "favoriteAlbumsGrid"
+    );
+
+  const count =
+    document.getElementById(
+      "favoriteAlbumsCount"
+    );
+
+  count.textContent =
+    String(albums.length);
+
+  grid.innerHTML = "";
+
+  if (!albums.length) {
+
     grid.innerHTML = `
-      <div class="empty">
-        Error cargando fotografías.
+      <div class="favorite-empty">
+        <strong>
+          No tienes álbumes favoritos
+        </strong>
+        Abre un álbum y toca ♡ Álbum favorito.
       </div>
     `;
+
+    return;
+  }
+
+
+  for (const album of albums) {
+
+    const card =
+      document.createElement("article");
+
+    card.className = "album";
+
+    let cover;
+
+    if (album.cover_key) {
+
+      const imageURL =
+        `${API}/images/${
+          encodeURIComponent(
+            album.cover_key
+          )
+        }`;
+
+      cover = `
+        <div class="cover">
+          <img
+            src="${imageURL}"
+            alt=""
+            loading="lazy"
+          >
+        </div>
+      `;
+
+    } else {
+
+      cover = `
+        <div class="cover">
+          BP
+        </div>
+      `;
+
+    }
+
+
+    card.innerHTML = `
+      ${cover}
+
+      <div class="album-info">
+
+        <p class="album-name"></p>
+
+        <p class="album-count">
+          ♥
+          ${album.photo_count || 0}
+          foto${
+            Number(album.photo_count) === 1
+              ? ""
+              : "s"
+          }
+        </p>
+
+      </div>
+    `;
+
+    card
+      .querySelector(
+        ".album-name"
+      )
+      .textContent =
+        album.name;
+
+
+    card.addEventListener(
+      "click",
+      () => openAlbum(album.id)
+    );
+
+
+    grid.appendChild(card);
 
   }
 }
@@ -2041,16 +2218,24 @@ function renderFavoritePhotos(photos) {
       "favoritePhotosGrid"
     );
 
+  const count =
+    document.getElementById(
+      "favoritePhotosCount"
+    );
+
+  count.textContent =
+    String(photos.length);
+
   grid.innerHTML = "";
 
   if (!photos.length) {
 
     grid.innerHTML = `
-      <div class="empty">
+      <div class="favorite-empty">
         <strong>
           No tienes fotos favoritas
         </strong>
-        Marca una fotografía con ♥ para que aparezca aquí.
+        Abre una fotografía y toca ♡ Favorito.
       </div>
     `;
 
@@ -2061,10 +2246,10 @@ function renderFavoritePhotos(photos) {
   for (const photo of photos) {
 
     const item =
-      document.createElement("div");
+      document.createElement("article");
 
     item.className =
-      "photo-item";
+      "favorite-photo-card";
 
 
     const image =
@@ -2089,24 +2274,42 @@ function renderFavoritePhotos(photos) {
       document.createElement("div");
 
     heart.className =
-      "photo-favorite-badge";
+      "favorite-photo-heart";
 
     heart.textContent = "♥";
 
 
+    const overlay =
+      document.createElement("div");
+
+    overlay.className =
+      "favorite-photo-overlay";
+
+
+    const albumName =
+      document.createElement("span");
+
+    albumName.className =
+      "favorite-photo-album";
+
+    albumName.textContent =
+      photo.album_name ||
+      "Álbum";
+
+
+    overlay.appendChild(
+      albumName
+    );
+
     item.appendChild(image);
     item.appendChild(heart);
+    item.appendChild(overlay);
 
 
     item.addEventListener(
       "click",
       async () => {
 
-        /*
-         * Abrimos primero el álbum.
-         * Así también funciona correctamente
-         * el botón Atrás.
-         */
         await openAlbum(
           photo.album_id
         );
@@ -2120,7 +2323,9 @@ function renderFavoritePhotos(photos) {
 
         if (index !== -1) {
 
-          openPhotoViewer(index);
+          openPhotoViewer(
+            index
+          );
 
         }
 
@@ -2132,5 +2337,6 @@ function renderFavoritePhotos(photos) {
 
   }
 }
+
 
 init();
