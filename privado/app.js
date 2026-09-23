@@ -265,7 +265,9 @@ createForm.addEventListener(
 
     const description =
       document
-        .getElementById("albumDescription")
+        .getElementById(
+          "createAlbumDescription"
+        )
         .value
         .trim();
 
