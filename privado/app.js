@@ -807,6 +807,144 @@ async function init() {
 }
 
 
+function renderDescriptionWithLinks(
+  element,
+  value
+) {
+
+  const text =
+    String(value || "").trim();
+
+  element.replaceChildren();
+
+  if (!text) {
+
+    element.textContent =
+      "Sin descripción";
+
+    return;
+
+  }
+
+  const urlRegex =
+    /(?:https?:\/\/|www\.)[^\s<]+/gi;
+
+  let lastIndex = 0;
+
+  for (
+    const match
+    of text.matchAll(urlRegex)
+  ) {
+
+    const matchIndex =
+      match.index ?? 0;
+
+    const original =
+      match[0];
+
+    let visibleURL =
+      original;
+
+    let trailing = "";
+
+    while (
+      visibleURL.length &&
+      /[.,!?;:)\]}]$/.test(
+        visibleURL
+      )
+    ) {
+
+      trailing =
+        visibleURL.slice(-1) +
+        trailing;
+
+      visibleURL =
+        visibleURL.slice(0, -1);
+
+    }
+
+
+    if (
+      matchIndex >
+      lastIndex
+    ) {
+
+      element.appendChild(
+        document.createTextNode(
+          text.slice(
+            lastIndex,
+            matchIndex
+          )
+        )
+      );
+
+    }
+
+
+    if (visibleURL) {
+
+      const link =
+        document.createElement(
+          "a"
+        );
+
+      link.className =
+        "album-description-link";
+
+      link.href =
+        /^www\./i.test(
+          visibleURL
+        )
+          ? `https://${visibleURL}`
+          : visibleURL;
+
+      link.textContent =
+        visibleURL;
+
+      link.target = "_blank";
+
+      link.rel =
+        "noopener noreferrer";
+
+      element.appendChild(link);
+
+    }
+
+
+    if (trailing) {
+
+      element.appendChild(
+        document.createTextNode(
+          trailing
+        )
+      );
+
+    }
+
+
+    lastIndex =
+      matchIndex +
+      original.length;
+
+  }
+
+
+  if (
+    lastIndex <
+    text.length
+  ) {
+
+    element.appendChild(
+      document.createTextNode(
+        text.slice(lastIndex)
+      )
+    );
+
+  }
+
+}
+
+
 function renderAlbumView(data) {
 
   currentAlbum = data.album;
@@ -881,9 +1019,10 @@ function renderAlbumView(data) {
       currentAlbum.description || ""
     ).trim();
 
-  albumDescription.textContent =
-    description ||
-    "Sin descripción";
+  renderDescriptionWithLinks(
+    albumDescription,
+    description
+  );
 
   albumDescription.classList.toggle(
     "is-empty",
