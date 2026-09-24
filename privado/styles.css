@@ -2657,3 +2657,37 @@ body.settings-open {
     padding-inline: 7px;
   }
 }
+
+
+/* =========================================
+   ENLACES EN DESCRIPCIONES
+========================================= */
+
+.album-description {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.album-description-link {
+  color: #ff91bd;
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.album-description-link:visited {
+  color: #ffc0da;
+}
+
+.album-description-link:focus-visible {
+  outline: 2px solid #ff73ac;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .album-description-link:hover {
+    color: #ffffff;
+  }
+}
