@@ -115,6 +115,55 @@
         El botón cambiará a ⏸️ mientras esté reproduciéndose.
       </p>
     </div>
+
+    <div class="settings-card storage-card">
+      <div class="settings-card-heading">
+        <div>
+          <span class="settings-label">
+            ALMACENAMIENTO
+          </span>
+
+          <strong>
+            Uso de R2
+          </strong>
+        </div>
+
+        <span
+          class="storage-percent"
+          id="storageUsagePercent"
+        >
+          —
+        </span>
+      </div>
+
+      <div
+        class="storage-progress"
+        role="progressbar"
+        aria-label="Almacenamiento utilizado"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+      >
+        <div
+          class="storage-progress-fill"
+          id="storageProgressFill"
+        ></div>
+      </div>
+
+      <div class="storage-details">
+        <span id="storageUsedText">
+          Calculando...
+        </span>
+
+        <span id="storageObjectCount">
+          —
+        </span>
+      </div>
+
+      <p class="settings-help storage-help">
+        El porcentaje se compara con una referencia de 10 GB.
+      </p>
+    </div>
   </aside>
 </div>
 
