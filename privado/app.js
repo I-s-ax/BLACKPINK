@@ -52,6 +52,14 @@ async function api(path, options = {}) {
 }
 
 
+function isVideoMedia(media) {
+
+  return String(
+    media?.mime_type || ""
+  ).startsWith("video/");
+}
+
+
 /* CARGAR ÁLBUMES */
 
 async function loadAlbums() {
@@ -174,7 +182,7 @@ function renderAlbums(albums) {
 
         <p class="album-count">
           ${album.photo_count || 0}
-          foto${
+          archivo${
             Number(album.photo_count) === 1
               ? ""
               : "s"
@@ -1034,7 +1042,7 @@ function renderAlbumView(data) {
     currentPhotos.length;
 
   albumInfo.textContent =
-    `${photoTotal} foto${
+    `${photoTotal} archivo${
       photoTotal === 1 ? "" : "s"
     }`;
 
@@ -1101,7 +1109,7 @@ function renderAlbumView(data) {
         <strong>
           Este álbum todavía está vacío
         </strong>
-        Sube tus primeras fotografías con el botón +.
+        Sube tus primeras fotos o videos con el botón +.
       </div>
     `;
 
@@ -1140,26 +1148,67 @@ function renderAlbumView(data) {
       );
 
 
-      const image =
-        document.createElement(
-          "img"
-        );
-
-      image.src =
+      const mediaURL =
         `${API}/images/${
           encodeURIComponent(
             photo.r2_key
           )
         }`;
 
-      image.loading = "lazy";
+      const video =
+        isVideoMedia(photo);
 
-      image.alt =
-        photo.title ||
-        photo.filename ||
-        "Fotografía";
+      const media =
+        document.createElement(
+          video ? "video" : "img"
+        );
 
-      item.appendChild(image);
+      media.src = mediaURL;
+
+      if (video) {
+
+        media.preload = "metadata";
+        media.muted = true;
+        media.playsInline = true;
+
+        media.setAttribute(
+          "aria-label",
+          photo.title ||
+          photo.filename ||
+          "Video"
+        );
+
+      } else {
+
+        media.loading = "lazy";
+
+        media.alt =
+          photo.title ||
+          photo.filename ||
+          "Fotografía";
+
+      }
+
+      item.appendChild(media);
+
+      if (video) {
+
+        const playBadge =
+          document.createElement(
+            "div"
+          );
+
+        playBadge.className =
+          "video-play-badge";
+
+        playBadge.textContent =
+          "▶";
+
+        item.appendChild(
+          playBadge
+        );
+
+      }
 
       const selectionIndicator =
         document.createElement(
@@ -1847,7 +1896,7 @@ document
           ) {
             throw new Error(
               data.error ||
-              "Error subiendo imagen"
+              "Error subiendo archivo"
             );
           }
         }
@@ -1879,6 +1928,9 @@ const photoViewer =
 
 const viewerImage =
   document.getElementById("viewerImage");
+
+const viewerVideo =
+  document.getElementById("viewerVideo");
 
 const viewerCounter =
   document.getElementById("viewerCounter");
@@ -1980,12 +2032,23 @@ function updatePhotoViewer() {
     return;
   }
 
+  const video =
+    isVideoMedia(photo);
+
   const coverButton =
     document.getElementById(
       "setCoverPhoto"
     );
 
-  if (
+
+  if (video) {
+
+    coverButton.textContent =
+      "Portada: solo fotos";
+
+    coverButton.disabled = true;
+
+  } else if (
     currentAlbum &&
     currentAlbum.cover_key ===
       photo.r2_key
@@ -2006,23 +2069,58 @@ function updatePhotoViewer() {
   }
 
 
-  viewerImage.classList.remove(
-    "slideshow-change"
-  );
-
-  viewerImage.src =
+  const mediaURL =
     `${API}/images/${
       encodeURIComponent(
         photo.r2_key
       )
     }`;
 
-  // Reinicia una animación sutil al cambiar de fotografía.
-  void viewerImage.offsetWidth;
 
-  viewerImage.classList.add(
+  viewerImage.classList.remove(
     "slideshow-change"
   );
+
+  viewerVideo.classList.remove(
+    "slideshow-change"
+  );
+
+
+  if (video) {
+
+    viewerImage.hidden = true;
+    viewerImage.removeAttribute(
+      "src"
+    );
+
+    viewerVideo.hidden = false;
+    viewerVideo.src = mediaURL;
+    viewerVideo.load();
+
+    // No saltamos un video automáticamente.
+    if (slideshowRunning) {
+      stopSlideshow();
+    }
+
+  } else {
+
+    viewerVideo.pause();
+    viewerVideo.hidden = true;
+    viewerVideo.removeAttribute(
+      "src"
+    );
+    viewerVideo.load();
+
+    viewerImage.hidden = false;
+    viewerImage.src = mediaURL;
+
+    void viewerImage.offsetWidth;
+
+    viewerImage.classList.add(
+      "slideshow-change"
+    );
+
+  }
 
 
   viewerCounter.textContent =
@@ -2035,7 +2133,8 @@ function updatePhotoViewer() {
 
 
   slideshowToggleButton.disabled =
-    currentPhotos.length < 2;
+    currentPhotos.length < 2 ||
+    video;
 }
 
 
@@ -2046,6 +2145,12 @@ function closePhotoViewer() {
   photoViewer.classList.remove("show");
 
   viewerImage.src = "";
+
+  viewerVideo.pause();
+  viewerVideo.removeAttribute(
+    "src"
+  );
+  viewerVideo.load();
 
   document.body.style.overflow = "";
 }
@@ -2669,7 +2774,12 @@ document
 
         if (!document.fullscreenElement) {
 
-          await viewerImage.requestFullscreen();
+          const media =
+            viewerVideo.hidden
+              ? viewerImage
+              : viewerVideo;
+
+          await media.requestFullscreen();
 
         } else {
 
@@ -3481,7 +3591,7 @@ function renderFavoriteAlbums(albums) {
         <p class="album-count">
           ♥
           ${album.photo_count || 0}
-          foto${
+          archivo${
             Number(album.photo_count) === 1
               ? ""
               : "s"
@@ -3533,9 +3643,9 @@ function renderFavoritePhotos(photos) {
     grid.innerHTML = `
       <div class="favorite-empty">
         <strong>
-          No tienes fotos favoritas
+          No tienes fotos ni videos favoritos
         </strong>
-        Abre una fotografía y toca ♡ Favorito.
+        Abre una foto o video y toca ♡ Favorito.
       </div>
     `;
 
@@ -3552,8 +3662,13 @@ function renderFavoritePhotos(photos) {
       "favorite-photo-card";
 
 
+    const video =
+      isVideoMedia(photo);
+
     const image =
-      document.createElement("img");
+      document.createElement(
+        video ? "video" : "img"
+      );
 
     image.src =
       `${API}/images/${
@@ -3562,12 +3677,29 @@ function renderFavoritePhotos(photos) {
         )
       }`;
 
-    image.loading = "lazy";
+    if (video) {
 
-    image.alt =
-      photo.title ||
-      photo.filename ||
-      "Fotografía";
+      image.preload = "metadata";
+      image.muted = true;
+      image.playsInline = true;
+
+      image.setAttribute(
+        "aria-label",
+        photo.title ||
+        photo.filename ||
+        "Video"
+      );
+
+    } else {
+
+      image.loading = "lazy";
+
+      image.alt =
+        photo.title ||
+        photo.filename ||
+        "Fotografía";
+
+    }
 
 
     const heart =
@@ -3602,6 +3734,26 @@ function renderFavoritePhotos(photos) {
     );
 
     item.appendChild(image);
+
+    if (video) {
+
+      const playBadge =
+        document.createElement(
+          "div"
+        );
+
+      playBadge.className =
+        "favorite-video-play";
+
+      playBadge.textContent =
+        "▶";
+
+      item.appendChild(
+        playBadge
+      );
+
+    }
+
     item.appendChild(heart);
     item.appendChild(overlay);
 
