@@ -242,7 +242,7 @@
       <div class="favorite-section-header">
         <div>
           <span class="favorite-eyebrow">FOTOGRAFÍAS</span>
-          <h3>Fotos favoritas</h3>
+          <h3>Fotos y videos favoritos</h3>
         </div>
 
         <span
@@ -337,7 +337,7 @@
           id="photoUploader"
           type="file"
           multiple
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm"
           hidden
         >
 
@@ -348,7 +348,7 @@
             class="album-action album-action-primary"
             type="button"
           >
-            + Subir fotos
+            + Subir archivos
           </button>
 
           <button
@@ -639,6 +639,15 @@
       src=""
       alt="Fotografía"
     >
+
+    <video
+      id="viewerVideo"
+      class="viewer-video"
+      controls
+      playsinline
+      preload="metadata"
+      hidden
+    ></video>
 
     <div class="viewer-bottom">
 
