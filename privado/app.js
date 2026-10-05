@@ -1963,6 +1963,26 @@ const slideshowSpeedValue =
     "slideshowSpeedValue"
   );
 
+const storageUsagePercent =
+  document.getElementById(
+    "storageUsagePercent"
+  );
+
+const storageProgressFill =
+  document.getElementById(
+    "storageProgressFill"
+  );
+
+const storageUsedText =
+  document.getElementById(
+    "storageUsedText"
+  );
+
+const storageObjectCount =
+  document.getElementById(
+    "storageObjectCount"
+  );
+
 let slideshowTimer = null;
 let slideshowRunning = false;
 let slideshowDelaySeconds = 5;
@@ -2452,6 +2472,164 @@ document.addEventListener(
    MENÚ DE AJUSTES
 ========================================= */
 
+function formatStorageBytes(bytes) {
+
+  const value =
+    Number(bytes) || 0;
+
+  const units = [
+    "B",
+    "KB",
+    "MB",
+    "GB",
+    "TB"
+  ];
+
+  if (value <= 0) {
+    return "0 B";
+  }
+
+  const index =
+    Math.min(
+      Math.floor(
+        Math.log(value) /
+        Math.log(1024)
+      ),
+      units.length - 1
+    );
+
+  const amount =
+    value /
+    Math.pow(
+      1024,
+      index
+    );
+
+  return `${amount.toFixed(
+    amount >= 100 ||
+    index === 0
+      ? 0
+      : amount >= 10
+        ? 1
+        : 2
+  )} ${units[index]}`;
+}
+
+
+async function loadStorageStats() {
+
+  storageUsagePercent.textContent =
+    "…";
+
+  storageUsedText.textContent =
+    "Calculando...";
+
+  storageObjectCount.textContent =
+    "—";
+
+  try {
+
+    const data =
+      await api(
+        "/storage-stats"
+      );
+
+    const usedBytes =
+      Number(
+        data.used_bytes || 0
+      );
+
+    const targetBytes =
+      Number(
+        data.reference_bytes || 0
+      );
+
+    const objects =
+      Number(
+        data.object_count || 0
+      );
+
+    const percent =
+      targetBytes > 0
+        ? (
+            usedBytes /
+            targetBytes
+          ) * 100
+        : 0;
+
+    const safePercent =
+      Math.max(
+        0,
+        Math.min(
+          100,
+          percent
+        )
+      );
+
+    const visiblePercent =
+      percent < 0.1 &&
+      usedBytes > 0
+        ? "<0.1%"
+        : `${percent.toFixed(
+            percent >= 10
+              ? 1
+              : 2
+          )}%`;
+
+    storageUsagePercent.textContent =
+      visiblePercent;
+
+    storageProgressFill.style.width =
+      `${safePercent}%`;
+
+    storageUsedText.textContent =
+      `${formatStorageBytes(
+        usedBytes
+      )} de ${formatStorageBytes(
+        targetBytes
+      )}`;
+
+    storageObjectCount.textContent =
+      `${objects} archivo${
+        objects === 1
+          ? ""
+          : "s"
+      }`;
+
+    const progress =
+      storageProgressFill
+        .parentElement;
+
+    progress.setAttribute(
+      "aria-valuenow",
+      String(
+        Math.min(
+          100,
+          Math.round(percent)
+        )
+      )
+    );
+
+  } catch (error) {
+
+    storageUsagePercent.textContent =
+      "—";
+
+    storageUsedText.textContent =
+      "No se pudo calcular";
+
+    storageObjectCount.textContent =
+      "";
+
+    console.error(
+      "Error calculando almacenamiento:",
+      error
+    );
+
+  }
+}
+
+
 function openSettings() {
 
   settingsOverlay.hidden = false;
@@ -2464,6 +2642,8 @@ function openSettings() {
   document.body.classList.add(
     "settings-open"
   );
+
+  void loadStorageStats();
 }
 
 
